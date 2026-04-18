@@ -26,7 +26,6 @@ models/
 signals/
 backtest/
 logs/
-dashboard/index.html
 
 # Notebooks
 notebooks/.ipynb_checkpoints/
