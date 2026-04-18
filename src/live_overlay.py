@@ -196,6 +196,13 @@ def apply_live_overlay(signals: pd.DataFrame) -> pd.DataFrame:
         ins_buy = row["insider_buy_flag"]
         ins_sell = row["insider_sell_flag"]
 
+        # P2.7: ML SELL as negative filter — nếu model muốn SELL mà signal là BUY → downgrade
+        ml_sell = int(row.get("ml_sell_flag", 0))
+        if ml_sell and signal == "BUY":
+            df.at[idx, "signal"] = "HOLD"
+            signal = "HOLD"
+            tags.append("⚠️ ML cảnh báo bán (negative filter)")
+
         # Room status — kín room ảnh hưởng đến cách đọc dòng ngoại
         if room_full:
             tags.append("🔒 kín room ngoại")
