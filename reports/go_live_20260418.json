@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-04-18T21:40:38.027511",
+  "go_live_ready": true,
+  "passed": 9,
+  "failed": 0,
+  "checks": [
+    {
+      "check": "Model files",
+      "pass": true,
+      "detail": "XGB=✅ LGB=✅ RF=✅ Calibrator=✅",
+      "action": null
+    },
+    {
+      "check": "Bootstrap CI (Sharpe lower bound > 0)",
+      "pass": true,
+      "detail": "Sharpe p2.5 = 1.2958  ✅ PASS — Sharpe lower bound > 0",
+      "action": null
+    },
+    {
+      "check": "Benchmark (IR>0.5 AND Alpha>0 vs VN30)",
+      "pass": true,
+      "detail": "IR=0.896 Alpha=9.74%/yr",
+      "action": null
+    },
+    {
+      "check": "Data leakage (permutation test)",
+      "pass": true,
+      "detail": "Real AUC=0.5703, Perm AUC=0.5178, Gap=0.0525",
+      "action": null
+    },
+    {
+      "check": "Feature drift (PSI)",
+      "pass": true,
+      "detail": "No drift report — run monitoring/drift.py after data refresh",
+      "action": null
+    },
+    {
+      "check": "Circuit breaker",
+      "pass": true,
+      "detail": "No state file — defaults to CLOSED",
+      "action": null
+    },
+    {
+      "check": "Email notification config",
+      "pass": true,
+      "detail": "SENDER=✅ PASSWORD=✅ TO=✅",
+      "action": null
+    },
+    {
+      "check": "Macro data (yfinance)",
+      "pass": true,
+      "detail": "S&P500 data: 5 rows available",
+      "action": null
+    },
+    {
+      "check": "Cost model (RT cost < 1%)",
+      "pass": true,
+      "detail": "Typical round-trip cost: 0.500%",
+      "action": null
+    }
+  ]
+}

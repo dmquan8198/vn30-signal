@@ -209,11 +209,100 @@ def build_tracker_section(report: dict) -> str:
     </div>"""
 
 
+def build_regime_badge(signals: pd.DataFrame) -> str:
+    """Build regime badge HTML từ signal data."""
+    if signals.empty:
+        return ""
+    regime_state = int(signals["regime_state"].iloc[0]) if "regime_state" in signals.columns else 2
+    regime_names = {0: ("BEAR", "#ef4444", "🔴"), 1: ("SIDEWAYS", "#6b7280", "⚪"), 2: ("BULL", "#10b981", "🟢"), 3: ("BREAKOUT", "#f59e0b", "🚀")}
+    name, color, icon = regime_names.get(regime_state, ("BULL", "#10b981", "🟢"))
+    trend = float(signals["trend_strength"].iloc[0]) if "trend_strength" in signals.columns else 0
+    vol_z = float(signals["regime_volatility_z"].iloc[0]) if "regime_volatility_z" in signals.columns else 0
+    return f"""
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);
+                border:1px solid {color}33;border-radius:8px;padding:6px 14px;margin-left:12px">
+      <span style="font-size:14px">{icon}</span>
+      <div>
+        <div style="font-size:12px;color:#64748b;font-weight:500">Regime</div>
+        <div style="font-size:14px;font-weight:700;color:{color}">{name}</div>
+      </div>
+      <div style="border-left:1px solid #1e3a5f;padding-left:10px">
+        <div style="font-size:11px;color:#64748b">Trend</div>
+        <div style="font-size:13px;font-weight:600;color:{'#10b981' if trend>0 else '#ef4444'}">{trend:+.3f}</div>
+      </div>
+      <div style="border-left:1px solid #1e3a5f;padding-left:10px">
+        <div style="font-size:11px;color:#64748b">Vol-Z</div>
+        <div style="font-size:13px;font-weight:600;color:{'#ef4444' if vol_z>1.5 else '#94a3b8'}">{vol_z:+.2f}</div>
+      </div>
+    </div>"""
+
+
+def build_portfolio_section(signals: pd.DataFrame) -> str:
+    """Build portfolio allocation section using PortfolioSizer."""
+    try:
+        from portfolio.sizing import PortfolioSizer
+        sizer = PortfolioSizer(total_capital=50_000_000)
+        sized = sizer.select_trades(signals)
+        summary = sizer.summary(sized)
+    except Exception:
+        return ""
+
+    if not summary["positions"]:
+        return ""
+
+    rows = ""
+    for p in summary["positions"]:
+        size_m = p["position_size_vnd"] / 1_000_000
+        rows += f"""
+        <tr>
+          <td style="font-weight:700;color:#f8fafc">{p['ticker']}</td>
+          <td style="color:#10b981">{p['confidence']:.0%}</td>
+          <td style="color:#94a3b8">{p['sector']}</td>
+          <td style="color:#f59e0b;font-weight:600">{size_m:.1f}M</td>
+        </tr>"""
+
+    util = summary["utilization_pct"]
+    return f"""
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-title">💼 Đề xuất phân bổ vốn hôm nay</div>
+      <div style="display:flex;gap:20px;margin-bottom:14px">
+        <div style="background:#0f172a;border-radius:8px;padding:10px 16px">
+          <div style="font-size:11px;color:#64748b">Vị thế</div>
+          <div style="font-size:22px;font-weight:700;color:#f8fafc">{summary['n_positions']}<span style="font-size:13px;color:#64748b">/{summary['max_positions']}</span></div>
+        </div>
+        <div style="background:#0f172a;border-radius:8px;padding:10px 16px">
+          <div style="font-size:11px;color:#64748b">Vốn triển khai</div>
+          <div style="font-size:22px;font-weight:700;color:#f59e0b">{summary['deployed_vnd']/1_000_000:.0f}M</div>
+        </div>
+        <div style="background:#0f172a;border-radius:8px;padding:10px 16px">
+          <div style="font-size:11px;color:#64748b">Sử dụng</div>
+          <div style="font-size:22px;font-weight:700;color:#{'10b981' if util>=80 else '94a3b8'}">{util:.0f}%</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="color:#64748b;font-size:11px;text-transform:uppercase;border-bottom:1px solid #1e3a5f">
+            <th style="text-align:left;padding:6px 4px">Mã CK</th>
+            <th style="text-align:left;padding:6px 4px">Conf</th>
+            <th style="text-align:left;padding:6px 4px">Sector</th>
+            <th style="text-align:left;padding:6px 4px">Vốn</th>
+          </tr>
+        </thead>
+        <tbody style="color:#94a3b8">
+          {rows}
+        </tbody>
+      </table>
+      <div style="font-size:11px;color:#475569;margin-top:8px">* Dựa trên tổng vốn 50M VND, tối đa 5 vị thế, scaling theo confidence.</div>
+    </div>"""
+
+
 def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFrame, articles: dict, tracker_report: dict = None) -> str:
     date_str = signals["date"].iloc[0] if not signals.empty else datetime.today().strftime("%Y-%m-%d")
     market_bull = int(signals["vni_bull"].iloc[0]) if not signals.empty and "vni_bull" in signals.columns else 0
     market_label = "Thị trường đang tăng 🟢" if market_bull else "Thị trường đang giảm 🔴"
     market_color = "#10b981" if market_bull else "#ef4444"
+    regime_badge = build_regime_badge(signals)
+    portfolio_section = build_portfolio_section(signals)
 
     buy_signals = signals[signals["signal"] == "BUY"]
     high_conf = buy_signals[buy_signals["confidence"] >= 0.6]
@@ -458,9 +547,9 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
     <h1>VN30 <span>Signal</span> Dashboard</h1>
     <div class="meta">Cập nhật: {date_str} · Mô hình AI phân tích 45 chỉ số kỹ thuật</div>
   </div>
-  <div style="text-align:right">
-    <div style="font-size:11px;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">Xu hướng thị trường</div>
+  <div style="text-align:right;display:flex;align-items:center;gap:10px">
     <span class="regime-badge" style="background:rgba({"16,185,129" if market_bull else "239,68,68"},0.15);color:{market_color};border:1px solid rgba({"16,185,129" if market_bull else "239,68,68"},0.3)">{market_label}</span>
+    {regime_badge}
   </div>
 </div>
 
@@ -527,6 +616,9 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
       <div class="chart-wrap-tall"><canvas id="monthChart"></canvas></div>
     </div>
   </div>
+
+  <!-- Portfolio Allocation -->
+  {portfolio_section}
 
   <!-- Tracker / Accuracy Report -->
   {tracker_section_html}

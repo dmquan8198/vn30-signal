@@ -28,9 +28,64 @@ TRACKER_DIR.mkdir(parents=True, exist_ok=True)
 PREDICTIONS_FILE = TRACKER_DIR / "predictions.parquet"
 REPORT_FILE      = TRACKER_DIR / "latest_report.json"
 
-FORWARD_DAYS = 5
-BUY_TARGET   = 0.03   # ≥3% = "đúng" (khớp với target training)
-RANDOM_BASE  = 0.24   # tỷ lệ ngày tăng ≥3% trong dataset (~baseline)
+FORWARD_DAYS   = 5
+BUY_TARGET     = 0.03   # ≥3% = "đúng" (khớp với target training)
+RANDOM_BASE    = 0.24   # fallback hardcode khi không có đủ data
+BASELINE_WINDOW = 60    # số phiên gần nhất để tính dynamic baseline
+
+BASELINE_LOG = Path(__file__).parent.parent / "reports" / "baseline_drift.csv"
+
+
+# ─── 0. DYNAMIC BASELINE ─────────────────────────────────────────────────────
+
+def compute_dynamic_baseline(window: int = BASELINE_WINDOW) -> float:
+    """
+    Tính baseline động: % ngày trong {window} phiên gần nhất
+    có 5-day forward return ≥ BUY_TARGET (3%), cross toàn bộ VN30.
+
+    Thay thế RANDOM_BASE=0.24 hardcode bằng giá trị phản ánh regime thị trường hiện tại.
+    Fallback về RANDOM_BASE nếu không đủ data.
+    """
+    try:
+        records = []
+        for ticker in VN30:
+            df = load_ticker(ticker)
+            if df is None or df.empty or "close" not in df.columns:
+                continue
+            df = df.tail(window + FORWARD_DAYS + 5).copy()
+            df["fwd_ret"] = df["close"].shift(-FORWARD_DAYS) / df["close"] - 1
+            df = df.dropna(subset=["fwd_ret"]).tail(window)
+            records.append((df["fwd_ret"] >= BUY_TARGET).values)
+
+        if not records:
+            return RANDOM_BASE
+
+        all_hits = np.concatenate(records)
+        baseline = float(all_hits.mean())
+
+        # Log để track drift
+        try:
+            BASELINE_LOG.parent.mkdir(parents=True, exist_ok=True)
+            log_row = pd.DataFrame([{
+                "date": datetime.now().date().isoformat(),
+                "dynamic_baseline": round(baseline, 4),
+                "static_baseline": RANDOM_BASE,
+                "window_sessions": window,
+                "n_data_points": len(all_hits),
+            }])
+            if BASELINE_LOG.exists():
+                existing = pd.read_csv(BASELINE_LOG)
+                log_df = pd.concat([existing, log_row], ignore_index=True).drop_duplicates("date", keep="last")
+            else:
+                log_df = log_row
+            log_df.to_csv(BASELINE_LOG, index=False)
+        except Exception:
+            pass  # logging failure không được crash tracker
+
+        return max(0.05, min(0.80, baseline))  # clip về range hợp lý
+
+    except Exception:
+        return RANDOM_BASE
 
 
 # ─── 1. GHI DỰ ĐOÁN ──────────────────────────────────────────────────────────
@@ -199,10 +254,11 @@ def compute_prediction_score(resolved: pd.DataFrame) -> dict:
 
     buy = buy.dropna(subset=["hit", "actual_return"])
 
-    # Component 1: Hit Rate (chuẩn hóa)
+    # Component 1: Hit Rate (chuẩn hóa so với dynamic baseline)
     hit_rate = buy["hit"].mean()
-    # Scale: RANDOM_BASE → 0 điểm, 1.0 → 100 điểm
-    c1 = max(0, min(100, (hit_rate - RANDOM_BASE) / (1 - RANDOM_BASE) * 100))
+    dynamic_base = compute_dynamic_baseline()
+    # Scale: dynamic_base → 0 điểm, 1.0 → 100 điểm
+    c1 = max(0, min(100, (hit_rate - dynamic_base) / (1 - dynamic_base) * 100))
 
     # Component 2: Avg Return
     avg_ret = buy["actual_return"].mean()
@@ -230,6 +286,8 @@ def compute_prediction_score(resolved: pd.DataFrame) -> dict:
             "hit_rate":  round(hit_rate, 3),
             "avg_return": round(avg_ret, 4),
             "n_resolved": len(buy),
+            "dynamic_baseline": round(dynamic_base, 4),
+            "static_baseline": RANDOM_BASE,
         }
     }
 
