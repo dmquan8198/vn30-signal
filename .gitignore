@@ -1,0 +1,32 @@
+# Môi trường
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+
+# Claude Code local settings
+.claude/
+
+# Thư mục con trùng tên (nested)
+vn30-signal/
+
+# Data lớn — không cần push
+data/raw/
+data/index/
+data/news/
+data/tracker/
+data/features/
+
+# Models (có thể regenerate)
+models/
+
+# Output tự sinh
+signals/
+backtest/
+logs/
+dashboard/index.html
+
+# Notebooks
+notebooks/.ipynb_checkpoints/
