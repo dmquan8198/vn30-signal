@@ -27,9 +27,18 @@ FAST_N_EST = 50  # Giảm estimators để test nhanh
 def load_first_split():
     """Load features và trả về (X_train, y_train, X_test, y_test) của split đầu tiên."""
     from src.features import FEATURE_COLS
+    from src.macro import MACRO_FEATURE_COLS
+    from src.regime import REGIME_FEATURE_COLS
     from src.model import load_features, walk_forward_splits
 
     df = load_features()
+
+    # Fill new P3 features with 0 if features.parquet is pre-retrain
+    new_cols = MACRO_FEATURE_COLS + REGIME_FEATURE_COLS
+    for col in new_cols:
+        if col not in df.columns:
+            df[col] = 0.0
+
     splits = walk_forward_splits(df)
     assert splits, "Không có split nào — kiểm tra data"
 

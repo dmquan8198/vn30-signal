@@ -10,6 +10,8 @@ from pathlib import Path
 from src.fetch import load_all, load_index
 from src.sector import build_sector_returns, add_sector_features, SECTOR_FEATURE_COLS
 from src.earnings import add_earnings_features, EARNINGS_FEATURE_COLS
+from src.macro import build_macro_features, add_macro_features, MACRO_FEATURE_COLS
+from src.regime import detect_regime, add_regime_features, REGIME_FEATURE_COLS
 # CEILING_FLOOR_COLS defined below in this file
 
 FEATURES_DIR = Path(__file__).parent.parent / "data" / "features"
@@ -226,7 +228,7 @@ STOCK_FEATURE_COLS = [
     "body_size", "upper_shadow", "lower_shadow",
 ]
 
-FEATURE_COLS = STOCK_FEATURE_COLS + MARKET_CONTEXT_COLS + RELATIVE_STRENGTH_COLS + SECTOR_FEATURE_COLS + EARNINGS_FEATURE_COLS + CEILING_FLOOR_COLS
+FEATURE_COLS = STOCK_FEATURE_COLS + MARKET_CONTEXT_COLS + RELATIVE_STRENGTH_COLS + SECTOR_FEATURE_COLS + EARNINGS_FEATURE_COLS + CEILING_FLOOR_COLS + MACRO_FEATURE_COLS + REGIME_FEATURE_COLS
 
 
 def build_dataset(tickers: dict[str, pd.DataFrame] | None = None) -> pd.DataFrame:
@@ -235,6 +237,13 @@ def build_dataset(tickers: dict[str, pd.DataFrame] | None = None) -> pd.DataFram
 
     print("Building market context (VNINDEX + VN30)...")
     ctx = build_market_context()
+    vni = load_index("VNINDEX")
+
+    print("Detecting market regime...")
+    regime = detect_regime(vni)
+
+    print("Fetching macro features (USD/VND, oil, VIX)...")
+    macro_features = build_macro_features()
 
     print("Building sector returns...")
     sector_returns = build_sector_returns(tickers)
@@ -247,6 +256,8 @@ def build_dataset(tickers: dict[str, pd.DataFrame] | None = None) -> pd.DataFram
         df = add_sector_features(df, ticker, sector_returns)
         df = add_earnings_features(df, ticker)
         df = add_ceiling_floor_features(df)
+        df = add_macro_features(df, macro_features)
+        df = add_regime_features(df, regime)
         df = add_target(df)
         df["ticker"] = ticker
         frames.append(df)

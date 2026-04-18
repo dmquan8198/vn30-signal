@@ -14,6 +14,10 @@ from datetime import datetime, timedelta, timezone
 from vnstock import Vnstock
 
 from src.fetch import VN30
+from src.earnings import in_earnings_window, EARNINGS_SENSITIVE
+
+# Earnings event filter: avoid entering positions 2 days before/after earnings period
+EARNINGS_BUFFER_DAYS = 2
 
 # ─── 1. FOREIGN FLOW ──────────────────────────────────────────────────────────
 
@@ -240,6 +244,19 @@ def apply_live_overlay(signals: pd.DataFrame) -> pd.DataFrame:
             tags.append("👤 nội bộ mua (theo dõi)")
         if ins_sell and signal == "BUY":
             tags.append("👤 nội bộ đang bán")
+
+        # P3.4: Earnings event filter — tránh mua 2 ngày quanh mùa KQKD cho earnings-sensitive stocks
+        today = pd.Timestamp.today()
+        near_earnings = False
+        for offset in range(-EARNINGS_BUFFER_DAYS, EARNINGS_BUFFER_DAYS + 1):
+            check_date = today + pd.DateOffset(days=offset)
+            if in_earnings_window(check_date):
+                near_earnings = True
+                break
+        if near_earnings and row["ticker"] in EARNINGS_SENSITIVE and signal == "BUY":
+            df.at[idx, "signal"] = "HOLD"
+            signal = "HOLD"
+            tags.append("📅 mùa KQKD — tránh vào lệnh")
 
         df.at[idx, "news_tag"] = "  ".join(t for t in tags if t)
 

@@ -19,6 +19,8 @@ from src.features import (
 )
 from src.sector import build_sector_returns, add_sector_features
 from src.earnings import add_earnings_features
+from src.macro import build_macro_features, add_macro_features
+from src.regime import detect_regime, add_regime_features, get_current_regime
 from src.model import ensemble_predict
 from src.news import get_today_sentiment, apply_news_overlay, save_sentiment, save_articles, fetch_all_feeds, build_ticker_sentiment
 from src.live_overlay import apply_live_overlay
@@ -33,13 +35,19 @@ HIGH_CONFIDENCE_THRESHOLD = 0.60
 
 
 def load_models():
+    import pickle
     xgb_model = xgb.XGBClassifier()
     xgb_model.load_model(MODEL_DIR / "xgb_model.json")
     lgb_booster = lgb.Booster(model_file=str(MODEL_DIR / "lgb_model.txt"))
+    rf_path = MODEL_DIR / "rf_model.pkl"
+    rf_model = None
+    if rf_path.exists():
+        with open(rf_path, "rb") as f:
+            rf_model = pickle.load(f)
     classes = np.load(MODEL_DIR / "label_classes.npy")
     le = LabelEncoder()
     le.classes_ = classes
-    return xgb_model, lgb_booster, le
+    return xgb_model, lgb_booster, le, rf_model
 
 
 class LGBWrapper:
@@ -49,7 +57,7 @@ class LGBWrapper:
 
 
 def get_signal_today(refresh_data: bool = True, confidence_threshold: float = HIGH_CONFIDENCE_THRESHOLD) -> pd.DataFrame:
-    xgb_model, lgb_booster, le = load_models()
+    xgb_model, lgb_booster, le, rf_model = load_models()
     calibrator = load_calibrator()  # None if not fitted yet
 
     class _LGBWrapper:
@@ -64,6 +72,17 @@ def get_signal_today(refresh_data: bool = True, confidence_threshold: float = HI
         fetch_indices(delay=1.0)
 
     ctx = build_market_context()
+
+    print("  Fetching macro features (USD/VND, oil, VIX)...")
+    macro_features = build_macro_features()
+
+    print("  Detecting market regime...")
+    from src.fetch import load_index
+    vni = load_index("VNINDEX")
+    regime = detect_regime(vni)
+    current_regime = get_current_regime(regime)
+    regime_names = {0: "BEAR 🔴", 1: "SIDEWAYS ⚪", 2: "BULL 🟢", 3: "BREAKOUT 🚀"}
+    print(f"    Regime: {regime_names[current_regime['regime_state']]}")
 
     # Build sector returns from cached data (no extra API calls)
     print("  Building sector returns...")
@@ -95,6 +114,8 @@ def get_signal_today(refresh_data: bool = True, confidence_threshold: float = HI
             df = add_sector_features(df, ticker, sector_returns)
             df = add_earnings_features(df, ticker)
             df = add_ceiling_floor_features(df)
+            df = add_macro_features(df, macro_features)
+            df = add_regime_features(df, regime)
             df = df.dropna(subset=FEATURE_COLS)
 
             if df.empty:
@@ -104,7 +125,7 @@ def get_signal_today(refresh_data: bool = True, confidence_threshold: float = HI
             latest_date = latest.index[0]
 
             X = latest[FEATURE_COLS].values
-            preds, proba_avg = ensemble_predict(xgb_model, lgb_model, le, X)
+            preds, proba_avg = ensemble_predict(xgb_model, lgb_model, le, X, rf_model=rf_model)
             signal_val = preds[0]
             raw_confidence = float(proba_avg[0].max())
             confidence = float(calibrate_confidence(calibrator, raw_confidence))
@@ -229,15 +250,25 @@ if __name__ == "__main__":
     # Check circuit breaker — may raise threshold or halt
     cb = CircuitBreaker()
     cb_result = cb.check()
-    conf_threshold = cb_result["confidence_threshold"]
     if cb.is_open:
         print(f"\n🚨 CIRCUIT BREAKER OPEN: {cb_result['reason']}")
         print("   Signals halted. Fix performance issues before resuming.")
         sys.exit(1)
     elif cb_result["status"] == "HALF-OPEN":
-        print(f"⚠️  Circuit breaker HALF-OPEN — using stricter threshold: {conf_threshold:.0%}")
+        print(f"⚠️  Circuit breaker HALF-OPEN")
 
-    df = get_signal_today(refresh_data=refresh, confidence_threshold=conf_threshold)
+    df = get_signal_today(refresh_data=refresh)
+
+    # Dynamic threshold display (informational — filter already applied per-ticker)
+    from src.threshold import get_today_threshold
+    from src.macro import build_macro_features as _bm
+    from src.regime import detect_regime as _dr, get_current_regime as _gcr
+    from src.fetch import load_index as _li
+    _vni = _li("VNINDEX")
+    _regime = _gcr(_dr(_vni))
+    _macro = _bm()
+    dyn_thresh = get_today_threshold(_regime, _macro, cb_result["status"])
+    print(f"  Dynamic threshold: {dyn_thresh:.0%}  (regime={_regime['regime_name']})")
 
     # News overlay
     print("Fetching news sentiment...")

@@ -40,16 +40,9 @@ def run_backtest():
         y_train = train["target"].values
         X_test = test[FEATURE_COLS].values
 
-        xgb_m, lgb_m, le = train_ensemble(X_train, y_train)
+        xgb_m, lgb_m, rf_m, le = train_ensemble(X_train, y_train)
 
-        # Wrap lgb
-        class LGBWrapper:
-            def __init__(self, booster):
-                self.booster = booster
-            def predict_proba(self, X):
-                return self.booster.predict_proba(X)
-
-        preds, proba_avg = ensemble_predict(xgb_m, lgb_m, le, X_test)
+        preds, proba_avg = ensemble_predict(xgb_m, lgb_m, le, X_test, rf_model=rf_m)
         confidence = proba_avg.max(axis=1)
 
         test = test.copy()

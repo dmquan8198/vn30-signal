@@ -8,6 +8,7 @@ import pandas as pd
 from pathlib import Path
 from sklearn.metrics import classification_report
 from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
 import xgboost as xgb
 import lightgbm as lgb
 
@@ -83,19 +84,35 @@ def train_lgb(X_train, y_enc) -> lgb.LGBMClassifier:
     return model
 
 
+def train_rf(X_train, y_enc) -> RandomForestClassifier:
+    model = RandomForestClassifier(
+        n_estimators=300,
+        max_depth=8,
+        min_samples_leaf=10,
+        max_features="sqrt",
+        class_weight="balanced",
+        random_state=42,
+        n_jobs=-1,
+    )
+    model.fit(X_train, y_enc)
+    return model
+
+
 def train_ensemble(X_train, y_train):
     le = LabelEncoder()
     y_enc = le.fit_transform(y_train)
     xgb_model = train_xgb(X_train, y_enc)
     lgb_model = train_lgb(X_train, y_enc)
-    return xgb_model, lgb_model, le
+    rf_model = train_rf(X_train, y_enc)
+    return xgb_model, lgb_model, rf_model, le
 
 
-def ensemble_predict(xgb_model, lgb_model, le, X_test):
+def ensemble_predict(xgb_model, lgb_model, le, X_test, rf_model=None):
     """
-    Consensus ensemble:
-    - Nếu XGB và LGB đồng ý → dùng prediction đó, confidence = avg proba
-    - Nếu không đồng ý → HOLD (tránh sai)
+    3-model consensus ensemble (XGB + LGB + RF):
+    - Nếu majority (≥2/3) đồng ý → dùng prediction đó, confidence = avg proba
+    - Nếu tất cả không đồng ý → HOLD
+    RF là optional để duy trì backward compat với saved models.
     """
     proba_xgb = xgb_model.predict_proba(X_test)
     proba_lgb = lgb_model.predict_proba(X_test)
@@ -103,12 +120,27 @@ def ensemble_predict(xgb_model, lgb_model, le, X_test):
     pred_enc_xgb = proba_xgb.argmax(axis=1)
     pred_enc_lgb = proba_lgb.argmax(axis=1)
 
-    proba_avg = (proba_xgb + proba_lgb) / 2
-
-    # Consensus: chỉ giữ signal khi cả hai đồng ý
-    # Hold class index
     hold_enc = le.transform([0])[0]
-    consensus = np.where(pred_enc_xgb == pred_enc_lgb, pred_enc_xgb, hold_enc)
+
+    if rf_model is not None:
+        proba_rf = rf_model.predict_proba(X_test)
+        pred_enc_rf = proba_rf.argmax(axis=1)
+        proba_avg = (proba_xgb + proba_lgb + proba_rf) / 3
+
+        # Majority vote: at least 2 of 3 must agree
+        consensus = np.full(len(pred_enc_xgb), hold_enc, dtype=int)
+        for i in range(len(pred_enc_xgb)):
+            votes = [pred_enc_xgb[i], pred_enc_lgb[i], pred_enc_rf[i]]
+            # Find majority
+            from collections import Counter
+            count = Counter(votes)
+            top_label, top_count = count.most_common(1)[0]
+            if top_count >= 2:
+                consensus[i] = top_label
+    else:
+        # Fallback: original 2-model consensus
+        proba_avg = (proba_xgb + proba_lgb) / 2
+        consensus = np.where(pred_enc_xgb == pred_enc_lgb, pred_enc_xgb, hold_enc)
 
     preds = le.inverse_transform(consensus)
     return preds, proba_avg
@@ -143,15 +175,15 @@ def run_walk_forward():
         X_test = test[FEATURE_COLS].values
         y_test = test["target"].values
 
-        xgb_m, lgb_m, le = train_ensemble(X_train, y_train)
+        xgb_m, lgb_m, rf_m, le = train_ensemble(X_train, y_train)
 
         # Individual model predictions
         y_enc = le.transform(y_test)
         preds_xgb = le.inverse_transform(xgb_m.predict(X_test))
         preds_lgb = le.inverse_transform(lgb_m.predict(X_test))
 
-        # Ensemble
-        preds_ens, proba_avg = ensemble_predict(xgb_m, lgb_m, le, X_test)
+        # Ensemble (3-model)
+        preds_ens, proba_avg = ensemble_predict(xgb_m, lgb_m, le, X_test, rf_model=rf_m)
 
         r_xgb = evaluate(preds_xgb, None, le, y_test)
         r_lgb = evaluate(preds_lgb, None, le, y_test)
@@ -183,9 +215,12 @@ def run_walk_forward():
     X_final = final_train[FEATURE_COLS].values
     y_final = final_train["target"].values
 
-    final_xgb, final_lgb, final_le = train_ensemble(X_final, y_final)
+    import pickle
+    final_xgb, final_lgb, final_rf, final_le = train_ensemble(X_final, y_final)
     final_xgb.save_model(MODEL_DIR / "xgb_model.json")
     final_lgb.booster_.save_model(str(MODEL_DIR / "lgb_model.txt"))
+    with open(MODEL_DIR / "rf_model.pkl", "wb") as f:
+        pickle.dump(final_rf, f)
     np.save(MODEL_DIR / "label_classes.npy", final_le.classes_)
 
     print(f"\n✅ Models saved → {MODEL_DIR}/")
