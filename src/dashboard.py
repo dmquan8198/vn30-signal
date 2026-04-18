@@ -260,12 +260,12 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
             tag = str(r.get("news_tag", "") or "")
             ticker = r["ticker"]
 
-            # News badge
+            # News badge — clickable to show articles popup
             news_badges = ""
             if tag:
                 parts = [p.strip() for p in tag.split("  ") if p.strip()]
                 for p in parts:
-                    news_badges += f'<span class="news-badge">{p}</span> '
+                    news_badges += f'<span class="news-badge news-badge-link" data-ticker="{ticker}">{p}</span> '
 
             if sig == "BUY" and conf >= 0.6:
                 row_class = "row-buy-strong"
@@ -299,8 +299,8 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
             ret5 = r.get("ret_5d", 0)
             ret_color = "#10b981" if ret5 > 0 else "#ef4444"
 
-            # Ticker cell with hover news trigger
-            ticker_cell = f'<span class="ticker-link" data-ticker="{ticker}">{ticker}</span>'
+            # Ticker cell — links to Vietstock detail page
+            ticker_cell = f'<a class="ticker-link" href="https://finance.vietstock.vn/{ticker}/thong-tin-co-ban.htm" target="_blank" rel="noopener">{ticker}</a>'
 
             rows += f"""
             <tr class="{row_class}" data-ticker="{ticker}">
@@ -395,6 +395,8 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
   .badge-buy-low {{ background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.2); }}
   .badge-hold {{ background:rgba(100,116,139,0.15); color:#94a3b8; border:1px solid rgba(100,116,139,0.2); }}
   .news-badge {{ display:inline-block; padding:2px 6px; border-radius:4px; font-size:10px; background:rgba(245,158,11,0.1); color:#f59e0b; }}
+  .news-badge-link {{ cursor:pointer; border-bottom:1px dashed rgba(245,158,11,0.4); }}
+  .news-badge-link:hover {{ background:rgba(245,158,11,0.2); }}
 
   /* Confidence bar */
   .conf-bar {{ display:flex; align-items:center; gap:8px; min-width:110px; }}
@@ -715,7 +717,14 @@ function closePopup() {{
 }}
 
 document.addEventListener('click', function(e) {{
-  const el = e.target.closest('.ticker-link');
+  const badge = e.target.closest('.news-badge-link');
+  if (badge) {{
+    e.preventDefault();
+    showNewsPopup(badge.dataset.ticker, e);
+    return;
+  }}
+  // news section ticker-link still opens popup
+  const el = e.target.closest('.news-ticker-name');
   if (el) {{
     e.preventDefault();
     showNewsPopup(el.dataset.ticker, e);
