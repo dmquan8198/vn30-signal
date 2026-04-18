@@ -210,14 +210,31 @@ def build_tracker_section(report: dict) -> str:
 
 
 def build_regime_badge(signals: pd.DataFrame) -> str:
-    """Build regime badge HTML từ signal data."""
-    if signals.empty:
-        return ""
-    regime_state = int(signals["regime_state"].iloc[0]) if "regime_state" in signals.columns else 2
+    """Build regime badge HTML — tính trực tiếp từ VNINDEX nếu signals chưa có regime cols."""
+    regime_state = 2
+    trend = 0.0
+    vol_z = 0.0
+
+    if not signals.empty and "regime_state" in signals.columns:
+        regime_state = int(signals["regime_state"].iloc[0])
+        trend = float(signals.get("trend_strength", pd.Series([0])).iloc[0])
+        vol_z = float(signals.get("regime_volatility_z", pd.Series([0])).iloc[0])
+    else:
+        # Fallback: compute from VNINDEX directly
+        try:
+            from src.fetch import load_index
+            from src.regime import detect_regime, get_current_regime
+            vni = load_index("VNINDEX")
+            regime_df = detect_regime(vni)
+            cur = get_current_regime(regime_df)
+            regime_state = cur["regime_state"]
+            trend = cur["trend_strength"]
+            vol_z = cur["regime_volatility_z"]
+        except Exception:
+            pass
+
     regime_names = {0: ("BEAR", "#ef4444", "🔴"), 1: ("SIDEWAYS", "#6b7280", "⚪"), 2: ("BULL", "#10b981", "🟢"), 3: ("BREAKOUT", "#f59e0b", "🚀")}
     name, color, icon = regime_names.get(regime_state, ("BULL", "#10b981", "🟢"))
-    trend = float(signals["trend_strength"].iloc[0]) if "trend_strength" in signals.columns else 0
-    vol_z = float(signals["regime_volatility_z"].iloc[0]) if "regime_volatility_z" in signals.columns else 0
     return f"""
     <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);
                 border:1px solid {color}33;border-radius:8px;padding:6px 14px;margin-left:12px">
