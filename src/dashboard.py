@@ -83,127 +83,57 @@ def build_confidence_dist(signals: pd.DataFrame) -> dict:
     bins = ["<40%", "40-50%", "50-60%", "60-70%", "70-80%", ">80%"]
     edges = [0, 0.4, 0.5, 0.6, 0.7, 0.8, 1.01]
     counts = []
+    tickers = []
     for i in range(len(edges) - 1):
-        n = ((signals["confidence"] >= edges[i]) & (signals["confidence"] < edges[i+1])).sum()
-        counts.append(int(n))
-    return {"labels": bins, "values": counts}
+        mask = (signals["confidence"] >= edges[i]) & (signals["confidence"] < edges[i+1])
+        counts.append(int(mask.sum()))
+        tickers.append(signals[mask]["ticker"].tolist() if "ticker" in signals.columns else [])
+    return {"labels": bins, "values": counts, "tickers": tickers}
 
 
 def build_tracker_section(report: dict) -> str:
-    """Render tracker section HTML từ latest_report.json."""
+    """Compact tracker — chỉ hiển thị 3 con số quan trọng nhất."""
     if not report or not report.get("prediction_score", {}).get("score"):
-        return """
-        <div class="card" style="margin-bottom:24px">
-          <div class="card-title">🎯 Đánh giá độ chính xác dự đoán</div>
-          <div style="color:#64748b;font-size:13px;padding:8px 0">
-            Chưa có dữ liệu — hệ thống cần ít nhất 5 ngày giao dịch để đánh giá kết quả.
-          </div>
-        </div>"""
+        return ""
 
-    score_data  = report["prediction_score"]
-    analysis    = report["analysis"]
-    suggestions = report["suggestions"]
+    score_data = report["prediction_score"]
     s = score_data["score"]
     raw = score_data.get("raw", {})
-
-    if s >= 70:
-        grade_color, grade_text = "#10b981", "Rất tốt 🟢"
-    elif s >= 60:
-        grade_color, grade_text = "#f59e0b", "Tốt 🟡"
-    elif s >= 50:
-        grade_color, grade_text = "#f97316", "Trung bình 🟠"
-    else:
-        grade_color, grade_text = "#ef4444", "Cần cải thiện 🔴"
-
-    hit_rate   = raw.get("hit_rate", 0)
+    hit_rate = raw.get("hit_rate", 0)
     avg_return = raw.get("avg_return", 0)
     n_resolved = raw.get("n_resolved", 0)
-    ret_color  = "#10b981" if avg_return >= 0 else "#ef4444"
 
-    # Confidence breakdown
-    conf_rows = ""
-    for b in analysis.get("by_confidence", []):
-        pct = b["hit_rate"] * 100
-        bar_color = "#10b981" if b["hit_rate"] >= 0.4 else "#f59e0b" if b["hit_rate"] >= 0.28 else "#ef4444"
-        conf_rows += f"""
-        <div style="display:flex;align-items:center;gap:10px;padding:5px 0">
-          <span style="width:64px;font-size:12px;color:#94a3b8">{b['band']}</span>
-          <div style="flex:1;height:8px;background:#1e3a5f;border-radius:4px;overflow:hidden">
-            <div style="width:{min(pct,100):.0f}%;height:100%;background:{bar_color};border-radius:4px"></div>
-          </div>
-          <span style="width:36px;text-align:right;font-size:12px;font-weight:600;color:{bar_color}">{b['hit_rate']:.0%}</span>
-          <span style="width:50px;text-align:right;font-size:11px;color:#64748b">{b['n']} lệnh</span>
-        </div>"""
+    if s >= 70:
+        grade_color = "#10b981"
+    elif s >= 60:
+        grade_color = "#f59e0b"
+    elif s >= 50:
+        grade_color = "#f97316"
+    else:
+        grade_color = "#ef4444"
 
-    # Suggestions
-    sugg_html = ""
-    high = [s2 for s2 in suggestions if s2["priority"] == "high"][:3]
-    med  = [s2 for s2 in suggestions if s2["priority"] == "medium"][:2]
-    for s2 in high:
-        sugg_html += f"""
-        <div style="padding:10px 12px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;border-radius:0 6px 6px 0;margin-bottom:8px">
-          <div style="font-size:13px;font-weight:600;color:#f87171;margin-bottom:3px">❗ {s2['title']}</div>
-          <div style="font-size:12px;color:#94a3b8;line-height:1.5">{s2['detail']}</div>
-          <div style="font-size:11px;color:#64748b;margin-top:4px">→ {s2['action']}</div>
-        </div>"""
-    for s2 in med:
-        sugg_html += f"""
-        <div style="padding:10px 12px;background:rgba(245,158,11,0.07);border-left:3px solid #f59e0b;border-radius:0 6px 6px 0;margin-bottom:8px">
-          <div style="font-size:13px;font-weight:600;color:#fbbf24;margin-bottom:3px">💡 {s2['title']}</div>
-          <div style="font-size:12px;color:#94a3b8;line-height:1.5">{s2['detail']}</div>
-          <div style="font-size:11px;color:#64748b;margin-top:4px">→ {s2['action']}</div>
-        </div>"""
-
-    # Trend
-    trend = analysis.get("trend", {})
-    trend_html = ""
-    if trend.get("recent_30d_hit_rate") is not None:
-        r30 = trend["recent_30d_hit_rate"]
-        overall = trend["overall_hit_rate"]
-        delta = r30 - overall
-        arrow = "↑" if delta > 0 else "↓"
-        d_color = "#10b981" if delta > 0 else "#ef4444"
-        trend_html = f"""
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid #1e3a5f;margin-top:8px">
-          <span style="font-size:12px;color:#64748b">30 ngày gần nhất</span>
-          <span style="font-size:13px;font-weight:600;color:{d_color}">{r30:.0%}  <span style="font-size:11px">{arrow} {abs(delta):.0%} so với tổng thể</span></span>
-        </div>"""
+    ret_color = "#10b981" if avg_return >= 0 else "#ef4444"
 
     return f"""
     <div class="card" style="margin-bottom:24px">
-      <div class="card-title">🎯 Đánh giá độ chính xác dự đoán</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-
-        <!-- Left: Score + stats -->
-        <div>
-          <div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:16px">
-            <div style="font-size:56px;font-weight:800;color:{grade_color};line-height:1">{s:.0f}</div>
-            <div>
-              <div style="font-size:13px;color:#94a3b8;margin-bottom:2px">Điểm Dự Đoán / 100</div>
-              <div style="font-size:14px;font-weight:600;color:{grade_color}">{grade_text}</div>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-            <div style="background:#0f172a;border-radius:8px;padding:10px">
-              <div style="font-size:11px;color:#64748b;margin-bottom:3px">Tỷ lệ đúng</div>
-              <div style="font-size:20px;font-weight:700;color:#f8fafc">{hit_rate:.0%}</div>
-              <div style="font-size:10px;color:#64748b">trong {n_resolved} lệnh BUY</div>
-            </div>
-            <div style="background:#0f172a;border-radius:8px;padding:10px">
-              <div style="font-size:11px;color:#64748b;margin-bottom:3px">Lãi TB thực tế</div>
-              <div style="font-size:20px;font-weight:700;color:{ret_color}">{avg_return:+.1%}</div>
-              <div style="font-size:10px;color:#64748b">mỗi lần mua</div>
-            </div>
-          </div>
-          <div style="font-size:12px;color:#64748b;margin-bottom:6px;font-weight:500">Độ chính xác theo mức tin cậy:</div>
-          {conf_rows}
-          {trend_html}
+      <div class="card-title">
+        📡 Hiệu quả dự đoán gần đây
+        <span class="tip" data-tip="Đánh giá dựa trên {n_resolved} tín hiệu BUY đã có kết quả thực tế (khác với backtest: đây là kết quả live từ khi hệ thống vận hành).">?</span>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:stretch">
+        <div style="background:#0f172a;border-radius:8px;padding:12px 20px;text-align:center;min-width:100px">
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px">Điểm tổng thể</div>
+          <div style="font-size:36px;font-weight:800;color:{grade_color};line-height:1">{s:.0f}<span style="font-size:13px;color:#64748b">/100</span></div>
         </div>
-
-        <!-- Right: Suggestions -->
-        <div>
-          <div style="font-size:12px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Gợi ý cải thiện</div>
-          {sugg_html if sugg_html else '<div style="color:#64748b;font-size:13px">Chưa đủ dữ liệu để đưa ra gợi ý cụ thể.</div>'}
+        <div style="background:#0f172a;border-radius:8px;padding:12px 20px;text-align:center;min-width:100px">
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px">Tỷ lệ đúng</div>
+          <div style="font-size:28px;font-weight:700;color:#f8fafc">{hit_rate:.0%}</div>
+          <div style="font-size:11px;color:#64748b">{n_resolved} tín hiệu</div>
+        </div>
+        <div style="background:#0f172a;border-radius:8px;padding:12px 20px;text-align:center;min-width:100px">
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px">Lãi TB thực tế</div>
+          <div style="font-size:28px;font-weight:700;color:{ret_color}">{avg_return:+.1%}</div>
+          <div style="font-size:11px;color:#64748b">mỗi tín hiệu</div>
         </div>
       </div>
     </div>"""
@@ -233,23 +163,42 @@ def build_regime_badge(signals: pd.DataFrame) -> str:
         except Exception:
             pass
 
-    regime_names = {0: ("BEAR", "#ef4444", "🔴"), 1: ("SIDEWAYS", "#6b7280", "⚪"), 2: ("BULL", "#10b981", "🟢"), 3: ("BREAKOUT", "#f59e0b", "🚀")}
-    name, color, icon = regime_names.get(regime_state, ("BULL", "#10b981", "🟢"))
+    regime_names = {
+        0: ("BEAR — Thị trường giảm", "#ef4444", "🔴"),
+        1: ("SIDEWAYS — Đi ngang", "#6b7280", "⚪"),
+        2: ("BULL — Thị trường tăng", "#10b981", "🟢"),
+        3: ("BREAKOUT — Bứt phá", "#f59e0b", "🚀"),
+    }
+    name, color, icon = regime_names.get(regime_state, ("BULL — Thị trường tăng", "#10b981", "🟢"))
+
+    if trend > 0.02:
+        trend_label, trend_color = "Tăng ↑", "#10b981"
+    elif trend < -0.02:
+        trend_label, trend_color = "Giảm ↓", "#ef4444"
+    else:
+        trend_label, trend_color = "Đi ngang →", "#94a3b8"
+
+    if vol_z > 1.5:
+        vol_label, vol_color = "Cao ⚠️", "#ef4444"
+    elif vol_z < -1.0:
+        vol_label, vol_color = "Thấp", "#10b981"
+    else:
+        vol_label, vol_color = "Bình thường", "#94a3b8"
+
     return f"""
-    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);
-                border:1px solid {color}33;border-radius:8px;padding:6px 14px;margin-left:12px">
-      <span style="font-size:14px">{icon}</span>
+    <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.05);
+                border:1px solid {color}44;border-radius:10px;padding:8px 16px;margin-left:12px;flex-wrap:wrap">
       <div>
-        <div style="font-size:12px;color:#64748b;font-weight:500">Regime</div>
-        <div style="font-size:14px;font-weight:700;color:{color}">{name}</div>
+        <div style="font-size:10px;color:#64748b;font-weight:500;margin-bottom:2px">Trạng thái thị trường</div>
+        <div style="font-size:13px;font-weight:700;color:{color}">{icon} {name}</div>
       </div>
       <div style="border-left:1px solid #1e3a5f;padding-left:10px">
-        <div style="font-size:11px;color:#64748b">Trend</div>
-        <div style="font-size:13px;font-weight:600;color:{'#10b981' if trend>0 else '#ef4444'}">{trend:+.3f}</div>
+        <div style="font-size:10px;color:#64748b;margin-bottom:2px" title="Xu hướng giá dựa trên MA20 so với MA50 của VNINDEX">Xu hướng</div>
+        <div style="font-size:12px;font-weight:600;color:{trend_color}">{trend_label}</div>
       </div>
       <div style="border-left:1px solid #1e3a5f;padding-left:10px">
-        <div style="font-size:11px;color:#64748b">Vol-Z</div>
-        <div style="font-size:13px;font-weight:600;color:{'#ef4444' if vol_z>1.5 else '#94a3b8'}">{vol_z:+.2f}</div>
+        <div style="font-size:10px;color:#64748b;margin-bottom:2px" title="Mức độ biến động so với lịch sử: cao = thị trường đang có nhiều biến động">Biến động</div>
+        <div style="font-size:12px;font-weight:600;color:{vol_color}">{vol_label}</div>
       </div>
     </div>"""
 
@@ -315,6 +264,7 @@ def build_portfolio_section(signals: pd.DataFrame) -> str:
 
 def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFrame, articles: dict, tracker_report: dict = None) -> str:
     date_str = signals["date"].iloc[0] if not signals.empty else datetime.today().strftime("%Y-%m-%d")
+    generated_at = datetime.now().strftime("%d/%m/%Y %H:%M")
     market_bull = int(signals["vni_bull"].iloc[0]) if not signals.empty and "vni_bull" in signals.columns else 0
     market_label = "Thị trường đang tăng 🟢" if market_bull else "Thị trường đang giảm 🔴"
     market_color = "#10b981" if market_bull else "#ef4444"
@@ -562,7 +512,7 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
 <div class="header">
   <div>
     <h1>VN30 <span>Signal</span> Dashboard</h1>
-    <div class="meta">Cập nhật: {date_str} · Mô hình AI phân tích 45 chỉ số kỹ thuật</div>
+    <div class="meta">Tín hiệu ngày {date_str} · Tạo lúc {generated_at} · Mô hình AI phân tích 60 chỉ số kỹ thuật</div>
   </div>
   <div style="text-align:right;display:flex;align-items:center;gap:10px">
     <span class="regime-badge" style="background:rgba({"16,185,129" if market_bull else "239,68,68"},0.15);color:{market_color};border:1px solid rgba({"16,185,129" if market_bull else "239,68,68"},0.3)">{market_label}</span>
@@ -593,7 +543,7 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
     <div class="stat-card">
       <div class="stat-label">
         Tỷ lệ thắng
-        <span class="tip" data-tip="Tỷ lệ các lần mua theo tín hiệu AI có lời sau 5 ngày. Ví dụ: 65% nghĩa là cứ 10 lần mua thì 6-7 lần có lãi.">?</span>
+        <span class="tip" data-tip="Tỷ lệ các lần mua theo tín hiệu AI có lời sau 5 ngày — tính trên toàn bộ backtest lịch sử 2023–2026 ({total_trades} lệnh). Xem 'Hiệu quả dự đoán gần đây' để biết kết quả live.">?</span>
       </div>
       <div class="stat-value" style="color:#3b82f6">{win_rate:.1f}%</div>
       <div class="stat-sub">{total_trades} lần mua trong backtest</div>
@@ -774,7 +724,19 @@ new Chart(document.getElementById('confChart'), {{
   }},
   options: {{
     responsive: true, maintainAspectRatio: false,
-    plugins: {{ legend: {{ display: false }}, tooltip: {{ callbacks: {{ label: ctx => ' ' + ctx.parsed.y + ' mã' }} }} }},
+    plugins: {{
+      legend: {{ display: false }},
+      tooltip: {{
+        callbacks: {{
+          label: ctx => {{
+            const n = ctx.parsed.y;
+            const tickers = (confDist.tickers || [])[ctx.dataIndex] || [];
+            if (n === 0) return ' Không có mã nào';
+            return tickers.length ? ' ' + tickers.join(', ') : ' ' + n + ' mã';
+          }}
+        }}
+      }}
+    }},
     scales: {{
       x: {{ grid: {{ display: false }} }},
       y: {{ ticks: {{ stepSize: 1 }}, grid: {{ color: '#1e293b' }} }}
