@@ -421,7 +421,7 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
 
   /* Tooltip */
   .tip {{ display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; background:#1e3a5f; color:#64748b; font-size:10px; cursor:help; position:relative; flex-shrink:0; }}
-  .tip:hover::after {{ content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:#1e3a5f; border:1px solid #334155; color:#e2e8f0; font-size:12px; padding:8px 12px; border-radius:8px; white-space:nowrap; max-width:260px; white-space:normal; z-index:100; line-height:1.5; text-transform:none; letter-spacing:0; font-weight:400; }}
+  .tip:hover::after {{ content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:#1e3a5f; border:1px solid #334155; color:#e2e8f0; font-size:12px; padding:10px 14px; border-radius:8px; white-space:normal; max-width:340px; min-width:180px; z-index:100; line-height:1.6; text-transform:none; letter-spacing:0; font-weight:400; }}
   .tip:hover::before {{ content:''; position:absolute; bottom:calc(100% + 1px); left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:#334155; }}
 
   /* Layout */
