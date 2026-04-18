@@ -1,0 +1,166 @@
+{
+  "generated_at": "2026-04-18T14:52:45.197283",
+  "source_file": "/Users/dmquan8198/Developer/Work/Side-Projects/vn30-signal/backtest/trades.csv",
+  "config": {
+    "transaction_cost": 0.0015,
+    "hold_days": 5,
+    "confidence_threshold": 0.6,
+    "capital_per_trade": 10000000,
+    "train_years": 3,
+    "test_months": 6
+  },
+  "note": "BASELINE — trước bất kỳ cải tiến nào. Dùng để so sánh sau Phase 1, 2, 3.",
+  "all_directions": {
+    "label": "all_directions",
+    "period": {
+      "start": "2023-04-05",
+      "end": "2026-03-17",
+      "years": 2.95
+    },
+    "trades": {
+      "total": 473,
+      "per_year": 160.3,
+      "by_direction": {
+        "BUY": {
+          "n": 206,
+          "win_rate": 0.6553,
+          "avg_return_pct": 2.4813,
+          "total_pnl": 51119547.0
+        },
+        "SELL": {
+          "n": 267,
+          "win_rate": 0.4345,
+          "avg_return_pct": -1.1757,
+          "total_pnl": -31397095.0
+        }
+      }
+    },
+    "returns": {
+      "win_rate": 0.5307,
+      "avg_net_return_pct": 0.417,
+      "median_net_return_pct": 0.35,
+      "avg_win_pct": 4.8267,
+      "avg_loss_pct": -4.5688,
+      "profit_factor": 1.056,
+      "best_trade_pct": 22.51,
+      "worst_trade_pct": -21.2
+    },
+    "risk": {
+      "sharpe_annualized": 0.467,
+      "sortino_annualized": 0.69,
+      "max_drawdown_vnd": -19512452.0,
+      "max_drawdown_pct_of_trade_capital": -1.9512
+    },
+    "pnl": {
+      "total_vnd": 19722452.0,
+      "annual_vnd": 6684025.0
+    },
+    "efficiency": {
+      "exposure_pct": 1.0,
+      "hit_rate_buy_conf60": 0.6553
+    },
+    "cost_model": {
+      "transaction_cost_per_side": 0.0015,
+      "round_trip_cost": 0.003,
+      "note": "Thiếu sell tax (0.1%) và slippage — realistic cost ~0.5-0.8%"
+    }
+  },
+  "buy_only": {
+    "label": "buy_only",
+    "period": {
+      "start": "2023-04-20",
+      "end": "2026-03-17",
+      "years": 2.91
+    },
+    "trades": {
+      "total": 206,
+      "per_year": 70.8,
+      "by_direction": {
+        "BUY": {
+          "n": 206,
+          "win_rate": 0.6553,
+          "avg_return_pct": 2.4813,
+          "total_pnl": 51119547.0
+        }
+      }
+    },
+    "returns": {
+      "win_rate": 0.6553,
+      "avg_net_return_pct": 2.4813,
+      "median_net_return_pct": 2.54,
+      "avg_win_pct": 6.2651,
+      "avg_loss_pct": -4.7134,
+      "profit_factor": 1.329,
+      "best_trade_pct": 22.51,
+      "worst_trade_pct": -19.36
+    },
+    "risk": {
+      "sharpe_annualized": 2.528,
+      "sortino_annualized": 3.766,
+      "max_drawdown_vnd": -14350444.0,
+      "max_drawdown_pct_of_trade_capital": -1.435
+    },
+    "pnl": {
+      "total_vnd": 51119547.0,
+      "annual_vnd": 17569336.0
+    },
+    "efficiency": {
+      "exposure_pct": 1.0,
+      "hit_rate_buy_conf60": 0.6553
+    },
+    "cost_model": {
+      "transaction_cost_per_side": 0.0015,
+      "round_trip_cost": 0.003,
+      "note": "Thiếu sell tax (0.1%) và slippage — realistic cost ~0.5-0.8%"
+    }
+  },
+  "buy_conf60plus": {
+    "label": "buy_conf60plus",
+    "period": {
+      "start": "2023-04-20",
+      "end": "2026-03-17",
+      "years": 2.91
+    },
+    "trades": {
+      "total": 206,
+      "per_year": 70.8,
+      "by_direction": {
+        "BUY": {
+          "n": 206,
+          "win_rate": 0.6553,
+          "avg_return_pct": 2.4813,
+          "total_pnl": 51119547.0
+        }
+      }
+    },
+    "returns": {
+      "win_rate": 0.6553,
+      "avg_net_return_pct": 2.4813,
+      "median_net_return_pct": 2.54,
+      "avg_win_pct": 6.2651,
+      "avg_loss_pct": -4.7134,
+      "profit_factor": 1.329,
+      "best_trade_pct": 22.51,
+      "worst_trade_pct": -19.36
+    },
+    "risk": {
+      "sharpe_annualized": 2.528,
+      "sortino_annualized": 3.766,
+      "max_drawdown_vnd": -14350444.0,
+      "max_drawdown_pct_of_trade_capital": -1.435
+    },
+    "pnl": {
+      "total_vnd": 51119547.0,
+      "annual_vnd": 17569336.0
+    },
+    "efficiency": {
+      "exposure_pct": 1.0,
+      "hit_rate_buy_conf60": 0.6553
+    },
+    "cost_model": {
+      "transaction_cost_per_side": 0.0015,
+      "round_trip_cost": 0.003,
+      "note": "Thiếu sell tax (0.1%) và slippage — realistic cost ~0.5-0.8%"
+    }
+  }
+}
