@@ -118,7 +118,7 @@ def get_signal_today(refresh_data: bool = True) -> pd.DataFrame:
                 "date": latest_date.date(),
                 "signal": signal,
                 "confidence": round(confidence, 3),
-                "close": float(latest["close"].values[0]),
+                "close": float(latest["close"].values[0]) * 1000,
                 "rsi14": round(float(latest["rsi14"].values[0]), 1),
                 "ret_5d": round(float(latest["ret_5d"].values[0]) * 100, 2),
                 "vni_bull": int(latest["vni_bull_regime"].values[0]),
