@@ -24,8 +24,9 @@ models/
 
 # Output tự sinh
 signals/
-backtest/
+backtest/trades.csv
 logs/
+backtest/__pycache__/
 
 # Notebooks
 notebooks/.ipynb_checkpoints/

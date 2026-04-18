@@ -1,0 +1,84 @@
+{
+  "generated_at": "2026-04-18T15:05:57.256116",
+  "methodology": "Block bootstrap, n=1000, block_size=20 trades",
+  "results": {
+    "buy": {
+      "direction": "BUY",
+      "n_trades": 206,
+      "n_bootstrap": 1000,
+      "block_size": 20,
+      "observed": {
+        "sharpe": 2.5347,
+        "max_dd_vnd": -14352000.0,
+        "win_rate": 0.6553,
+        "annual_return_pct_sum": 175.6743
+      },
+      "bootstrap_95ci": {
+        "sharpe": {
+          "p2.5": 1.2958,
+          "median": 3.4433,
+          "p97.5": 5.8806
+        },
+        "max_dd_vnd": {
+          "p2.5": -16183250.0,
+          "median": -5128500.0,
+          "p97.5": -1947775.0
+        },
+        "win_rate": {
+          "p2.5": 0.5534,
+          "median": 0.6942,
+          "p97.5": 0.8155
+        },
+        "annual_return_pct_sum": {
+          "p2.5": 89.5028,
+          "median": 221.1893,
+          "p97.5": 363.23
+        }
+      },
+      "go_live_criteria": {
+        "sharpe_lower_bound_positive": true,
+        "sharpe_p2.5": 1.2958,
+        "result": "✅ PASS — Sharpe lower bound > 0"
+      }
+    },
+    "sell": {
+      "direction": "SELL",
+      "n_trades": 267,
+      "n_bootstrap": 1000,
+      "block_size": 20,
+      "observed": {
+        "sharpe": -1.5755,
+        "max_dd_vnd": -36176000.0,
+        "win_rate": 0.4345,
+        "annual_return_pct_sum": -110.5992
+      },
+      "bootstrap_95ci": {
+        "sharpe": {
+          "p2.5": -3.1313,
+          "median": -1.9314,
+          "p97.5": -0.8252
+        },
+        "max_dd_vnd": {
+          "p2.5": -59356500.0,
+          "median": -39182000.0,
+          "p97.5": -19812225.0
+        },
+        "win_rate": {
+          "p2.5": 0.3221,
+          "median": 0.4045,
+          "p97.5": 0.487
+        },
+        "annual_return_pct_sum": {
+          "p2.5": -204.9597,
+          "median": -132.2015,
+          "p97.5": -54.7179
+        }
+      },
+      "go_live_criteria": {
+        "sharpe_lower_bound_positive": false,
+        "sharpe_p2.5": -3.1313,
+        "result": "❌ FAIL — Sharpe lower bound ≤ 0, strategy NOT reliable"
+      }
+    }
+  }
+}
