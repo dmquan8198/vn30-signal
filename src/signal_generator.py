@@ -22,7 +22,7 @@ from src.earnings import add_earnings_features
 from src.macro import build_macro_features, add_macro_features
 from src.regime import detect_regime, add_regime_features, get_current_regime
 from src.model import ensemble_predict
-from src.news import get_today_sentiment, apply_news_overlay, save_sentiment, save_articles, fetch_all_feeds, build_ticker_sentiment
+from src.news import get_today_sentiment, apply_news_overlay, save_sentiment, save_articles
 from src.live_overlay import apply_live_overlay
 from src import tracker
 from src.calibration import load_calibrator, calibrate_confidence
@@ -270,14 +270,9 @@ if __name__ == "__main__":
     dyn_thresh = get_today_threshold(_regime, _macro, cb_result["status"])
     print(f"  Dynamic threshold: {dyn_thresh:.0%}  (regime={_regime['regime_name']})")
 
-    # News overlay
+    # News overlay (trong nước + quốc tế + geo risk)
     print("Fetching news sentiment...")
-    print("  Fetching Vietstock RSS feeds...")
-    articles = fetch_all_feeds(delay=0.5)
-    sentiment = build_ticker_sentiment(articles)
-    covered = (sentiment["news_count_1d"] > 0).sum()
-    print(f"  {covered}/{len(sentiment)} tickers có tin tức trong 24h")
-    print(f"  Market sentiment: {sentiment['market_sentiment_1d'].iloc[0]:+.2f}")
+    sentiment, articles = get_today_sentiment(verbose=True)
     save_sentiment(sentiment)
     save_articles(articles)
     df = apply_news_overlay(df, sentiment)
