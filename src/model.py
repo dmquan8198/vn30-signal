@@ -206,6 +206,7 @@ def run_walk_forward():
 
         pred_df = test[["ticker", "future_return"]].copy()
         pred_df["prediction"] = preds_ens
+        pred_df["confidence"] = proba_avg.max(axis=1)
         pred_df["split"] = i
         all_preds.append(pred_df)
 

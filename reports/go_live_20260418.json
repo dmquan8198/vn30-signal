@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-18T18:20:58.263283",
+  "generated_at": "2026-04-18T21:40:38.027511",
   "go_live_ready": true,
   "passed": 9,
   "failed": 0,
@@ -7,7 +7,7 @@
     {
       "check": "Model files",
       "pass": true,
-      "detail": "XGB=✅ LGB=✅ RF=⚠️ (optional) Calibrator=⚠️ (optional)",
+      "detail": "XGB=✅ LGB=✅ RF=✅ Calibrator=✅",
       "action": null
     },
     {
@@ -25,7 +25,7 @@
     {
       "check": "Data leakage (permutation test)",
       "pass": true,
-      "detail": "Real AUC=0.5654, Perm AUC=0.4981, Gap=0.0673",
+      "detail": "Real AUC=0.5703, Perm AUC=0.5178, Gap=0.0525",
       "action": null
     },
     {
