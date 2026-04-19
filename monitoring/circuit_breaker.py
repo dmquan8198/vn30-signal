@@ -105,7 +105,7 @@ class CircuitBreaker:
           metrics: rolling metrics
           confidence_threshold: current threshold to use for signal generation
         """
-        trades = self._load_recent_trades(days=60)
+        trades = self._load_recent_trades(days=30)
         metrics = self._compute_rolling_metrics(trades)
 
         # Determine triggers

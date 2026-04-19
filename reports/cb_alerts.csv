@@ -1,0 +1,4 @@
+date,status,triggers,sharpe,win_rate,max_dd_vnd,n_trades
+2026-04-18T23:49:33.210269,OPEN,"Rolling Sharpe=-6.085 < 0.0; Win rate=20.0% < 40%; Max DD=-14,352,000 VND > 15% capital",-6.085,0.2,-14352000.0,20
+2026-04-19T10:47:46.067566,OPEN,"Rolling Sharpe=-6.085 < 0.0; Win rate=20.0% < 40%; Max DD=-14,352,000 VND > 15% capital",-6.085,0.2,-14352000.0,20
+2026-04-19T10:48:17.705690,OPEN,"Rolling Sharpe=-6.085 < 0.0; Win rate=20.0% < 40%; Max DD=-14,352,000 VND > 15% capital",-6.085,0.2,-14352000.0,20

@@ -1,0 +1,10 @@
+{
+  "status": "HALF-OPEN",
+  "reason": "Recovery \u2014 metrics within bounds",
+  "updated_at": "2026-04-19T10:48:11.892910",
+  "rolling_sharpe": null,
+  "rolling_win_rate": null,
+  "opened_at": "2026-04-19T10:48:17.705680",
+  "last_checked": "2026-04-19T10:49:07.015875",
+  "consecutive_bad_days": 0
+}

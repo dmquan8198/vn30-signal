@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VN30 Signal — Tổng quan hệ thống</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#f8fafc; color:#1e293b; line-height:1.6; }
+
+  /* Hero */
+  .hero { background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%); color:#f8fafc; padding:64px 48px; text-align:center; }
+  .hero h1 { font-size:36px; font-weight:800; letter-spacing:-1px; margin-bottom:12px; }
+  .hero h1 span { color:#3b82f6; }
+  .hero p { font-size:16px; color:#94a3b8; max-width:640px; margin:0 auto 24px; line-height:1.7; }
+  .hero-badges { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:20px; }
+  .hero-badge { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:6px 16px; font-size:13px; color:#cbd5e1; }
+
+  /* Nav */
+  .nav { background:#fff; border-bottom:1px solid #e2e8f0; padding:0 48px; position:sticky; top:0; z-index:100; display:flex; gap:0; }
+  .nav a { padding:16px 20px; font-size:13px; font-weight:500; color:#64748b; text-decoration:none; border-bottom:2px solid transparent; white-space:nowrap; }
+  .nav a:hover { color:#1e293b; border-bottom-color:#3b82f6; }
+
+  /* Layout */
+  .container { max-width:1100px; margin:0 auto; padding:48px 32px; }
+  .section { margin-bottom:64px; }
+  .section-title { font-size:24px; font-weight:700; color:#0f172a; margin-bottom:8px; display:flex; align-items:center; gap:10px; }
+  .section-subtitle { font-size:15px; color:#64748b; margin-bottom:32px; }
+  .section-divider { width:48px; height:3px; background:#3b82f6; border-radius:2px; margin:12px 0 28px; }
+
+  /* Cards */
+  .card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; }
+  .card-sm { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:20px; }
+
+  /* Grid */
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; }
+  .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+
+  /* Stat numbers */
+  .stat-big { font-size:40px; font-weight:800; line-height:1; margin-bottom:4px; }
+  .stat-label { font-size:13px; color:#64748b; }
+
+  /* Tags */
+  .tag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+  .tag-blue { background:#dbeafe; color:#1d4ed8; }
+  .tag-green { background:#dcfce7; color:#166534; }
+  .tag-orange { background:#ffedd5; color:#c2410c; }
+  .tag-purple { background:#ede9fe; color:#6d28d9; }
+  .tag-gray { background:#f1f5f9; color:#475569; }
+  .tag-red { background:#fee2e2; color:#dc2626; }
+
+  /* Flow diagram */
+  .flow { display:flex; align-items:stretch; gap:0; overflow-x:auto; padding:8px 0; }
+  .flow-step { display:flex; flex-direction:column; align-items:center; min-width:130px; }
+  .flow-box { background:#1e293b; color:#f8fafc; border-radius:12px; padding:14px 16px; text-align:center; font-size:13px; font-weight:600; width:120px; position:relative; }
+  .flow-box .flow-icon { font-size:20px; margin-bottom:6px; }
+  .flow-box .flow-sub { font-size:10px; color:#94a3b8; margin-top:4px; font-weight:400; }
+  .flow-arrow { display:flex; align-items:center; padding:0 4px; color:#94a3b8; font-size:20px; align-self:center; }
+  .flow-box.blue { background:#1d4ed8; }
+  .flow-box.green { background:#166534; }
+  .flow-box.purple { background:#6d28d9; }
+  .flow-box.orange { background:#c2410c; }
+  .flow-box.teal { background:#0f766e; }
+
+  /* Pipeline steps */
+  .pipeline { display:flex; flex-direction:column; gap:0; }
+  .pipe-step { display:flex; gap:20px; position:relative; }
+  .pipe-step:not(:last-child)::before { content:''; position:absolute; left:19px; top:44px; bottom:-20px; width:2px; background:#e2e8f0; }
+  .pipe-num { width:40px; height:40px; border-radius:50%; background:#1e293b; color:#fff; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:4px; }
+  .pipe-body { flex:1; padding-bottom:28px; }
+  .pipe-title { font-size:15px; font-weight:700; color:#0f172a; margin-bottom:4px; }
+  .pipe-desc { font-size:14px; color:#475569; line-height:1.6; }
+  .pipe-in-out { display:flex; gap:12px; margin-top:10px; flex-wrap:wrap; }
+  .pipe-in { background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:6px 12px; font-size:12px; color:#0369a1; }
+  .pipe-out { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:6px 12px; font-size:12px; color:#166534; }
+
+  /* Decision tree */
+  .decision-flow { display:flex; flex-direction:column; gap:12px; }
+  .decision-row { display:flex; align-items:center; gap:12px; }
+  .decision-cond { background:#fef9c3; border:1px solid #fde68a; border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600; color:#854d0e; min-width:220px; }
+  .decision-then { font-size:13px; color:#64748b; }
+  .decision-result { background:#dcfce7; border:1px solid #bbf7d0; border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600; color:#166534; }
+  .decision-result.hold { background:#f1f5f9; border-color:#e2e8f0; color:#475569; }
+  .decision-result.alert { background:#fee2e2; border-color:#fecaca; color:#dc2626; }
+
+  /* Model cards */
+  .model-card { border-radius:12px; padding:20px; }
+  .model-card.xgb { background:linear-gradient(135deg,#dbeafe,#bfdbfe); border:1px solid #93c5fd; }
+  .model-card.lgb { background:linear-gradient(135deg,#dcfce7,#bbf7d0); border:1px solid #86efac; }
+  .model-card.rf  { background:linear-gradient(135deg,#ede9fe,#ddd6fe); border:1px solid #c4b5fd; }
+  .model-name { font-size:15px; font-weight:700; margin-bottom:4px; }
+  .model-desc { font-size:13px; color:#475569; }
+
+  /* Metrics row */
+  .metrics-row { display:flex; gap:16px; flex-wrap:wrap; margin-top:24px; }
+  .metric-box { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px 20px; min-width:120px; }
+  .metric-val { font-size:26px; font-weight:800; color:#0f172a; line-height:1; }
+  .metric-lbl { font-size:12px; color:#64748b; margin-top:4px; }
+
+  /* Risk section */
+  .risk-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .risk-card { border-radius:12px; padding:18px; }
+  .risk-card.green { background:#f0fdf4; border:1px solid #bbf7d0; }
+  .risk-card.yellow { background:#fefce8; border:1px solid #fde68a; }
+  .risk-card.red { background:#fff1f2; border:1px solid #fecaca; }
+  .risk-card.blue { background:#f0f9ff; border:1px solid #bae6fd; }
+  .risk-title { font-size:14px; font-weight:700; margin-bottom:6px; }
+  .risk-desc { font-size:13px; color:#475569; line-height:1.6; }
+
+  /* Timeline */
+  .timeline { display:flex; gap:0; overflow-x:auto; }
+  .tl-item { display:flex; flex-direction:column; align-items:center; min-width:120px; }
+  .tl-time { font-size:14px; font-weight:700; color:#1d4ed8; margin-bottom:8px; }
+  .tl-dot { width:12px; height:12px; border-radius:50%; background:#3b82f6; position:relative; z-index:1; }
+  .tl-line { display:flex; align-items:center; width:100%; margin:8px 0; }
+  .tl-line-inner { flex:1; height:2px; background:#e2e8f0; }
+  .tl-line-inner.left { background:#3b82f6; }
+  .tl-event { font-size:12px; color:#475569; text-align:center; padding:0 8px; line-height:1.5; }
+
+  /* Glossary */
+  .gloss-item { display:flex; gap:16px; padding:14px 0; border-bottom:1px solid #f1f5f9; }
+  .gloss-term { font-size:13px; font-weight:700; color:#1e293b; min-width:160px; }
+  .gloss-def { font-size:13px; color:#475569; line-height:1.6; }
+
+  /* Table */
+  table.clean { width:100%; border-collapse:collapse; font-size:14px; }
+  table.clean th { text-align:left; padding:10px 16px; background:#f8fafc; color:#475569; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; }
+  table.clean td { padding:12px 16px; border-bottom:1px solid #f1f5f9; color:#334155; vertical-align:top; }
+  table.clean tr:last-child td { border-bottom:none; }
+
+  /* Callout */
+  .callout { border-radius:12px; padding:16px 20px; margin:20px 0; display:flex; gap:12px; align-items:flex-start; }
+  .callout.info { background:#f0f9ff; border:1px solid #bae6fd; }
+  .callout.warn { background:#fefce8; border:1px solid #fde68a; }
+  .callout.success { background:#f0fdf4; border:1px solid #bbf7d0; }
+  .callout-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+  .callout-text { font-size:14px; color:#334155; line-height:1.6; }
+
+  /* Footer */
+  .footer { background:#1e293b; color:#94a3b8; text-align:center; padding:32px; font-size:13px; }
+
+  @media (max-width:768px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
+    .risk-grid { grid-template-columns:1fr; }
+    .hero { padding:40px 24px; }
+    .container { padding:32px 20px; }
+    .nav { padding:0 16px; overflow-x:auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div style="font-size:12px;color:#3b82f6;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">Tài liệu nội bộ · Dành cho Product Manager</div>
+  <h1>VN30 <span>Signal</span> System</h1>
+  <p>Hệ thống AI tự động phân tích 30 cổ phiếu bluechip Việt Nam mỗi ngày, đưa ra khuyến nghị MUA/CHỜ dựa trên 60 chỉ số kỹ thuật, vĩ mô và tâm lý thị trường.</p>
+  <div class="hero-badges">
+    <span class="hero-badge">🤖 3 mô hình AI song song</span>
+    <span class="hero-badge">📊 60 chỉ số đầu vào</span>
+    <span class="hero-badge">📅 Cập nhật 2 lần/ngày</span>
+    <span class="hero-badge">🛡️ Tự bảo vệ khi thua lỗ</span>
+    <span class="hero-badge">📧 Gửi email tự động</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#overview">Tổng quan</a>
+  <a href="#data">Dữ liệu</a>
+  <a href="#model">Mô hình AI</a>
+  <a href="#signal">Tín hiệu</a>
+  <a href="#risk">Quản lý rủi ro</a>
+  <a href="#output">Đầu ra</a>
+  <a href="#schedule">Lịch vận hành</a>
+  <a href="#glossary">Thuật ngữ</a>
+</nav>
+
+<div class="container">
+
+  <!-- ── 1. TỔNG QUAN ── -->
+  <section class="section" id="overview">
+    <div class="section-title">🗺️ Tổng quan hệ thống</div>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Hệ thống hoạt động như một "trợ lý phân tích chứng khoán" tự động — thu thập dữ liệu, chạy mô hình AI, lọc tín hiệu và gửi kết quả đến người dùng mỗi ngày.</p>
+
+    <!-- Big flow -->
+    <div class="card" style="overflow-x:auto;margin-bottom:32px">
+      <div style="font-size:13px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:20px">Luồng xử lý tổng thể</div>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-box blue">
+            <div class="flow-icon">📡</div>
+            Thu thập<br>dữ liệu
+            <div class="flow-sub">Giá, khối lượng<br>tin tức, vĩ mô</div>
+          </div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box" style="background:#334155">
+            <div class="flow-icon">⚙️</div>
+            Tính đặc<br>trưng
+            <div class="flow-sub">60 chỉ số<br>kỹ thuật</div>
+          </div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box purple">
+            <div class="flow-icon">🤖</div>
+            3 mô hình<br>AI dự đoán
+            <div class="flow-sub">XGB · LGB · RF<br>biểu quyết</div>
+          </div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box" style="background:#0f766e">
+            <div class="flow-icon">🔍</div>
+            Lọc &amp;<br>hiệu chỉnh
+            <div class="flow-sub">Dòng ngoại<br>Tin nội bộ</div>
+          </div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box green">
+            <div class="flow-icon">📋</div>
+            Tín hiệu<br>cuối cùng
+            <div class="flow-sub">MUA / CHỜ<br>+ độ chắc chắn</div>
+          </div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box orange">
+            <div class="flow-icon">📤</div>
+            Phân phối<br>kết quả
+            <div class="flow-sub">Dashboard<br>Email</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 key numbers -->
+    <div class="grid-4">
+      <div class="card-sm" style="border-left:4px solid #3b82f6">
+        <div class="stat-big" style="color:#3b82f6">30</div>
+        <div class="stat-label">Cổ phiếu VN30<br>được phân tích mỗi ngày</div>
+      </div>
+      <div class="card-sm" style="border-left:4px solid #10b981">
+        <div class="stat-big" style="color:#10b981">60</div>
+        <div class="stat-label">Chỉ số đầu vào<br>cho mỗi cổ phiếu</div>
+      </div>
+      <div class="card-sm" style="border-left:4px solid #f59e0b">
+        <div class="stat-big" style="color:#f59e0b">5</div>
+        <div class="stat-label">Ngày giao dịch<br>tầm nhìn dự báo</div>
+      </div>
+      <div class="card-sm" style="border-left:4px solid #8b5cf6">
+        <div class="stat-big" style="color:#8b5cf6">2×</div>
+        <div class="stat-label">Cập nhật mỗi ngày<br>giao dịch tự động</div>
+      </div>
+    </div>
+
+    <div class="callout info" style="margin-top:24px">
+      <div class="callout-icon">💡</div>
+      <div class="callout-text"><strong>Hệ thống KHÔNG tự động đặt lệnh.</strong> Tín hiệu là khuyến nghị để nhà đầu tư tham khảo — quyết định mua/bán cuối cùng luôn do con người thực hiện.</div>
+    </div>
+  </section>
+
+  <!-- ── 2. DỮ LIỆU ── -->
+  <section class="section" id="data">
+    <div class="section-title">📡 Nguồn dữ liệu đầu vào</div>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Hệ thống kết hợp 4 loại dữ liệu từ nhiều nguồn khác nhau để có bức tranh toàn diện về từng cổ phiếu.</p>
+
+    <div class="grid-2" style="margin-bottom:24px">
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span style="font-size:24px">📈</span>
+          <div>
+            <div style="font-weight:700;font-size:15px">Dữ liệu giá &amp; khối lượng</div>
+            <div style="font-size:12px;color:#64748b">Nguồn: Vnstock API (SSI/TCBS)</div>
+          </div>
+        </div>
+        <table class="clean">
+          <tr><td><strong>Lịch sử</strong></td><td>Từ 2020 đến nay (~6 năm)</td></tr>
+          <tr><td><strong>Tần suất</strong></td><td>Hàng ngày (sau 15:00)</td></tr>
+          <tr><td><strong>Dữ liệu</strong></td><td>Mở cửa, đóng cửa, cao nhất, thấp nhất, khối lượng</td></tr>
+          <tr><td><strong>Phạm vi</strong></td><td>30 mã VN30 + VNINDEX + VN30 index</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span style="font-size:24px">🌍</span>
+          <div>
+            <div style="font-weight:700;font-size:15px">Dữ liệu vĩ mô quốc tế</div>
+            <div style="font-size:12px;color:#64748b">Nguồn: Yahoo Finance (yfinance)</div>
+          </div>
+        </div>
+        <table class="clean">
+          <tr><td><strong>USD/VND</strong></td><td>Tỷ giá hối đoái — ảnh hưởng dòng vốn ngoại</td></tr>
+          <tr><td><strong>Brent Oil</strong></td><td>Giá dầu thô — tác động lên HPG, GAS, PLX</td></tr>
+          <tr><td><strong>VIX</strong></td><td>Chỉ số sợ hãi toàn cầu — tâm lý rủi ro</td></tr>
+          <tr><td><strong>S&amp;P 500</strong></td><td>Thị trường Mỹ — xu hướng vốn quốc tế</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span style="font-size:24px">💹</span>
+          <div>
+            <div style="font-weight:700;font-size:15px">Dòng vốn &amp; giao dịch nội bộ</div>
+            <div style="font-size:12px;color:#64748b">Nguồn: SSI Price Board, HOSE</div>
+          </div>
+        </div>
+        <table class="clean">
+          <tr><td><strong>Dòng ngoại</strong></td><td>Khối ngoại mua ròng hay bán ròng hôm nay</td></tr>
+          <tr><td><strong>Room ngoại</strong></td><td>Tỷ lệ sở hữu ngoại gần đầy hay còn nhiều</td></tr>
+          <tr><td><strong>Giao dịch nội bộ</strong></td><td>Ban lãnh đạo mua/bán cổ phiếu 30 ngày qua</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span style="font-size:24px">📰</span>
+          <div>
+            <div style="font-weight:700;font-size:15px">Tin tức &amp; sự kiện</div>
+            <div style="font-size:12px;color:#64748b">Nguồn: Vietstock RSS, lịch tài chính</div>
+          </div>
+        </div>
+        <table class="clean">
+          <tr><td><strong>Tâm lý tin tức</strong></td><td>Phân tích cảm xúc (+1 tích cực, -1 tiêu cực)</td></tr>
+          <tr><td><strong>Mùa kết quả</strong></td><td>Cổ phiếu đang trong tuần công bố KQKD</td></tr>
+          <tr><td><strong>Sàn/trần</strong></td><td>Cổ phiếu đang kẹt trần/sàn nhiều phiên liên tiếp</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Feature groups -->
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px">60 chỉ số đặc trưng được tính từ dữ liệu thô</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="background:#dbeafe;border-radius:8px;padding:10px 16px;min-width:160px">
+          <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:6px">📐 Kỹ thuật giá (28)</div>
+          <div style="font-size:12px;color:#475569">RSI, MACD, Bollinger Bands, MA, EMA, momentum, volume ratios...</div>
+        </div>
+        <div style="background:#dcfce7;border-radius:8px;padding:10px 16px;min-width:160px">
+          <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:6px">🏛️ Bối cảnh thị trường (10)</div>
+          <div style="font-size:12px;color:#475569">Beta với VNINDEX, tương quan ngành, nằm trong hay ngoài xu hướng chung...</div>
+        </div>
+        <div style="background:#ede9fe;border-radius:8px;padding:10px 16px;min-width:160px">
+          <div style="font-size:12px;font-weight:700;color:#6d28d9;margin-bottom:6px">🌍 Vĩ mô quốc tế (5)</div>
+          <div style="font-size:12px;color:#475569">Tỷ giá, giá dầu, VIX, S&P500 — 5 ngày thay đổi</div>
+        </div>
+        <div style="background:#fef9c3;border-radius:8px;padding:10px 16px;min-width:160px">
+          <div style="font-size:12px;font-weight:700;color:#854d0e;margin-bottom:6px">📡 Trạng thái thị trường (4)</div>
+          <div style="font-size:12px;color:#475569">BULL/BEAR/SIDEWAYS/BREAKOUT, sức mạnh xu hướng, biến động</div>
+        </div>
+        <div style="background:#ffedd5;border-radius:8px;padding:10px 16px;min-width:160px">
+          <div style="font-size:12px;font-weight:700;color:#c2410c;margin-bottom:6px">🏭 Ngành &amp; sự kiện (13)</div>
+          <div style="font-size:12px;color:#475569">Ngành kinh doanh, mùa KQKD, kẹt trần/sàn, room ngoại...</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 3. MÔ HÌNH AI ── -->
+  <section class="section" id="model">
+    <div class="section-title">🤖 Mô hình AI &amp; dự đoán</div>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Hệ thống dùng 3 mô hình AI khác nhau chạy song song rồi lấy kết quả theo nguyên tắc đa số phiếu — giúp giảm sai số do bất kỳ mô hình đơn lẻ nào mắc phải.</p>
+
+    <!-- 3 models -->
+    <div class="grid-3" style="margin-bottom:28px">
+      <div class="model-card xgb">
+        <div class="model-name" style="color:#1d4ed8">⚡ XGBoost</div>
+        <div class="model-desc" style="color:#1e40af">Cây quyết định tăng cường dần. Giỏi bắt các mẫu phi tuyến phức tạp trong dữ liệu giá.</div>
+        <div style="margin-top:12px;font-size:12px;color:#3b82f6">400 cây · Depth 5</div>
+      </div>
+      <div class="model-card lgb">
+        <div class="model-name" style="color:#166534">🌿 LightGBM</div>
+        <div class="model-desc" style="color:#14532d">Biến thể tốc độ cao của gradient boosting. Xử lý nhiều dữ liệu nhanh, ít bộ nhớ hơn.</div>
+        <div style="margin-top:12px;font-size:12px;color:#16a34a">400 cây · Depth 6 · 40 lá</div>
+      </div>
+      <div class="model-card rf">
+        <div class="model-name" style="color:#6d28d9">🌲 Random Forest</div>
+        <div class="model-desc" style="color:#5b21b6">Rừng cây ngẫu nhiên. Ổn định hơn, ít bị ảnh hưởng bởi dữ liệu nhiễu. Đóng vai trò "trọng tài".</div>
+        <div style="margin-top:12px;font-size:12px;color:#7c3aed">300 cây · Depth 8 · Balanced</div>
+      </div>
+    </div>
+
+    <!-- Voting mechanism -->
+    <div class="card" style="margin-bottom:28px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:20px">🗳️ Cơ chế biểu quyết đa số (Majority Vote)</div>
+      <div class="grid-2">
+        <div>
+          <div class="decision-flow">
+            <div style="font-size:13px;color:#64748b;margin-bottom:12px">Ví dụ: dự đoán cho mã HPG hôm nay</div>
+            <div class="decision-row">
+              <div style="width:80px;font-size:12px;font-weight:700;color:#1d4ed8;text-align:center;background:#dbeafe;border-radius:6px;padding:6px">XGBoost</div>
+              <div style="font-size:18px;color:#e2e8f0">→</div>
+              <div style="background:#dcfce7;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;color:#166534">MUA ✓</div>
+            </div>
+            <div class="decision-row">
+              <div style="width:80px;font-size:12px;font-weight:700;color:#166534;text-align:center;background:#dcfce7;border-radius:6px;padding:6px">LightGBM</div>
+              <div style="font-size:18px;color:#e2e8f0">→</div>
+              <div style="background:#dcfce7;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;color:#166534">MUA ✓</div>
+            </div>
+            <div class="decision-row">
+              <div style="width:80px;font-size:12px;font-weight:700;color:#6d28d9;text-align:center;background:#ede9fe;border-radius:6px;padding:6px">Random Forest</div>
+              <div style="font-size:18px;color:#e2e8f0">→</div>
+              <div style="background:#f1f5f9;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;color:#475569">CHỜ</div>
+            </div>
+            <div style="margin-top:16px;padding:12px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0">
+              <span style="font-size:13px;font-weight:700;color:#166534">✅ Kết quả: MUA</span>
+              <span style="font-size:12px;color:#475569;margin-left:8px">(2/3 đồng ý → đa số thắng)</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;color:#64748b;margin-bottom:12px">Các kịch bản kết quả</div>
+          <table class="clean">
+            <tr>
+              <th>XGB</th><th>LGB</th><th>RF</th><th>Kết quả</th>
+            </tr>
+            <tr>
+              <td><span class="tag tag-green">MUA</span></td>
+              <td><span class="tag tag-green">MUA</span></td>
+              <td><span class="tag tag-green">MUA</span></td>
+              <td><span class="tag tag-green">✅ MUA</span></td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-green">MUA</span></td>
+              <td><span class="tag tag-green">MUA</span></td>
+              <td><span class="tag tag-gray">CHỜ</span></td>
+              <td><span class="tag tag-green">✅ MUA</span></td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-green">MUA</span></td>
+              <td><span class="tag tag-gray">CHỜ</span></td>
+              <td><span class="tag tag-gray">CHỜ</span></td>
+              <td><span class="tag tag-gray">⏸️ CHỜ</span></td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-green">MUA</span></td>
+              <td><span class="tag tag-gray">CHỜ</span></td>
+              <td><span class="tag tag-red">Bán</span></td>
+              <td><span class="tag tag-gray">⏸️ CHỜ</span></td>
+            </tr>
+          </table>
+          <div class="callout warn" style="margin-top:12px">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-text" style="font-size:12px">Tín hiệu BÁN từ AI <strong>không xuất hiện trong khuyến nghị</strong> — chỉ dùng nội bộ để lọc bỏ tín hiệu MUA không chắc chắn.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Training methodology -->
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px">📚 Phương pháp huấn luyện — Walk-Forward Validation</div>
+      <p style="font-size:13px;color:#475569;margin-bottom:20px">Thay vì train một lần rồi test một lần (dễ gian lận dữ liệu), hệ thống train/test liên tiếp như thực tế — chỉ dùng dữ liệu quá khứ để dự đoán tương lai.</p>
+      <div style="display:flex;gap:0;overflow-x:auto;align-items:center">
+        <div style="background:#dbeafe;border-radius:8px;padding:10px 20px;font-size:12px;font-weight:700;color:#1d4ed8;text-align:center;min-width:140px">🎓 Train<br><span style="font-weight:400;color:#3b82f6">3 năm dữ liệu</span></div>
+        <div style="font-size:20px;color:#94a3b8;padding:0 4px">→</div>
+        <div style="background:#dcfce7;border-radius:8px;padding:10px 20px;font-size:12px;font-weight:700;color:#166534;text-align:center;min-width:120px">🧪 Test<br><span style="font-weight:400;color:#16a34a">6 tháng tiếp</span></div>
+        <div style="font-size:20px;color:#94a3b8;padding:0 4px">→</div>
+        <div style="background:#dbeafe;border-radius:8px;padding:10px 20px;font-size:12px;font-weight:700;color:#1d4ed8;text-align:center;min-width:140px">🎓 Train<br><span style="font-weight:400;color:#3b82f6">+6 tháng nữa</span></div>
+        <div style="font-size:20px;color:#94a3b8;padding:0 4px">→</div>
+        <div style="background:#dcfce7;border-radius:8px;padding:10px 20px;font-size:12px;font-weight:700;color:#166534;text-align:center;min-width:120px">🧪 Test<br><span style="font-weight:400;color:#16a34a">6 tháng tiếp</span></div>
+        <div style="font-size:20px;color:#94a3b8;padding:0 4px">→</div>
+        <div style="font-size:24px;color:#94a3b8;padding:0 8px">···</div>
+        <div style="font-size:20px;color:#94a3b8;padding:0 4px">→</div>
+        <div style="background:#1e293b;border-radius:8px;padding:10px 20px;font-size:12px;font-weight:700;color:#f8fafc;text-align:center;min-width:120px">🚀 Model<br>cuối cùng</div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric-box"><div class="metric-val">4</div><div class="metric-lbl">Vòng test<br>walk-forward</div></div>
+        <div class="metric-box"><div class="metric-val" style="color:#10b981">67%</div><div class="metric-lbl">Tỷ lệ thắng<br>trung bình (BUY)</div></div>
+        <div class="metric-box"><div class="metric-val" style="color:#3b82f6">+1.2%</div><div class="metric-lbl">Lãi TB/lệnh<br>sau phí</div></div>
+        <div class="metric-box"><div class="metric-val" style="color:#8b5cf6">3.5</div><div class="metric-lbl">Sharpe ratio<br>(CI thấp nhất)</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 4. TÍN HIỆU ── -->
+  <section class="section" id="signal">
+    <div class="section-title">📋 Từ dự đoán đến tín hiệu cuối cùng</div>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Sau khi AI dự đoán, tín hiệu còn phải qua nhiều lớp lọc bổ sung để loại bỏ các trường hợp rủi ro cao trước khi đến tay người dùng.</p>
+
+    <div class="pipeline" style="margin-bottom:32px">
+
+      <div class="pipe-step">
+        <div class="pipe-num" style="background:#3b82f6">1</div>
+        <div class="pipe-body">
+          <div class="pipe-title">AI dự đoán thô</div>
+          <div class="pipe-desc">3 mô hình AI cho ra dự đoán MUA/CHỜ/BÁN cùng xác suất (0–100%). Biểu quyết đa số để ra kết quả sơ bộ.</div>
+          <div class="pipe-in-out">
+            <div class="pipe-in">📥 60 chỉ số hôm nay</div>
+            <div class="pipe-out">📤 MUA/CHỜ + xác suất thô</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-num" style="background:#8b5cf6">2</div>
+        <div class="pipe-body">
+          <div class="pipe-title">Hiệu chỉnh độ chắc chắn (Calibration)</div>
+          <div class="pipe-desc">Xác suất thô từ AI thường bị lệch (VD: nói 80% chắc nhưng thực tế chỉ 60%). Bước này điều chỉnh về đúng thực tế dựa trên lịch sử hiệu quả của mô hình.</div>
+          <div class="pipe-in-out">
+            <div class="pipe-in">📥 Xác suất thô (ví dụ: 80%)</div>
+            <div class="pipe-out">📤 Độ chắc chắn thực tế (ví dụ: 65%)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-num" style="background:#0f766e">3</div>
+        <div class="pipe-body">
+          <div class="pipe-title">Ngưỡng động theo bối cảnh thị trường</div>
+          <div class="pipe-desc">Ngưỡng tối thiểu để ra tín hiệu MUA thay đổi theo điều kiện: thị trường xấu → AI phải chắc hơn mới dám khuyến nghị.</div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px">
+            <div style="background:#f0fdf4;border-radius:8px;padding:10px;font-size:12px">
+              <div style="font-weight:700;color:#166534;margin-bottom:4px">🟢 BULL market</div>
+              Ngưỡng: <strong>57%</strong> — thị trường tốt, dễ mua hơn
+            </div>
+            <div style="background:#f1f5f9;border-radius:8px;padding:10px;font-size:12px">
+              <div style="font-weight:700;color:#475569;margin-bottom:4px">⚪ SIDEWAYS</div>
+              Ngưỡng: <strong>62%</strong> — cẩn thận hơn
+            </div>
+            <div style="background:#fff1f2;border-radius:8px;padding:10px;font-size:12px">
+              <div style="font-weight:700;color:#dc2626;margin-bottom:4px">🔴 BEAR market</div>
+              Ngưỡng: <strong>67%</strong> — thị trường xấu, chỉ mua khi rất chắc
+            </div>
+            <div style="background:#fefce8;border-radius:8px;padding:10px;font-size:12px">
+              <div style="font-weight:700;color:#854d0e;margin-bottom:4px">📊 VIX cao (sợ hãi)</div>
+              Ngưỡng: <strong>+5%</strong> thêm vào ngưỡng cơ bản
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-num" style="background:#c2410c">4</div>
+        <div class="pipe-body">
+          <div class="pipe-title">Lớp lọc bổ sung (Overlay Filters)</div>
+          <div class="pipe-desc">Ngay cả khi AI nói MUA, các điều kiện bên dưới sẽ hạ xuống CHỜ để bảo vệ nhà đầu tư:</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+            <div style="border-left:3px solid #ef4444;padding-left:10px;font-size:13px">
+              <strong>🚨 Khối ngoại bán mạnh</strong><br>
+              <span style="color:#475569">Nếu khối ngoại bán ròng &gt;2% khối lượng → hạ xuống CHỜ</span>
+            </div>
+            <div style="border-left:3px solid #ef4444;padding-left:10px;font-size:13px">
+              <strong>🤖 AI nói BÁN</strong><br>
+              <span style="color:#475569">Nếu mô hình AI thấy tín hiệu bán → lọc bỏ tín hiệu MUA</span>
+            </div>
+            <div style="border-left:3px solid #f59e0b;padding-left:10px;font-size:13px">
+              <strong>📊 Kẹt sàn nhiều phiên</strong><br>
+              <span style="color:#475569">Cổ phiếu kẹt sàn ≥2 phiên liên tiếp → không mua</span>
+            </div>
+            <div style="border-left:3px solid #f59e0b;padding-left:10px;font-size:13px">
+              <strong>📅 Tuần công bố KQKD</strong><br>
+              <span style="color:#475569">Cổ phiếu nhạy cảm (HPG, VNM...) trong ±2 ngày công bố → bỏ qua</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-num" style="background:#10b981">5</div>
+        <div class="pipe-body">
+          <div class="pipe-title">Tín hiệu cuối cùng</div>
+          <div class="pipe-desc">Kết quả được lưu thành file CSV với đầy đủ thông tin để hiển thị trên dashboard và gửi email.</div>
+          <div class="pipe-in-out">
+            <div class="pipe-out">✅ MUA / CHỜ + độ chắc chắn + giá + RSI + ±5d return</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Signal output example -->
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px">📄 Ví dụ tín hiệu đầu ra</div>
+      <table class="clean">
+        <thead>
+          <tr>
+            <th>Mã CK</th><th>Khuyến nghị</th><th>Độ chắc chắn</th><th>Giá đóng cửa</th><th>RSI</th><th>±5 ngày</th><th>Ghi chú</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>HPG</strong></td>
+            <td><span class="tag tag-green">⭐ NÊN MUA</span></td>
+            <td><strong style="color:#10b981">72%</strong></td>
+            <td>27,500đ</td>
+            <td>44 (bình thường)</td>
+            <td style="color:#10b981">+1.8%</td>
+            <td style="color:#64748b;font-size:12px">Ngoại mua ròng</td>
+          </tr>
+          <tr>
+            <td><strong>VNM</strong></td>
+            <td><span class="tag tag-blue">MUA</span></td>
+            <td style="color:#f59e0b">58%</td>
+            <td>62,000đ</td>
+            <td>38 (oversold)</td>
+            <td style="color:#ef4444">-0.5%</td>
+            <td style="color:#64748b;font-size:12px">—</td>
+          </tr>
+          <tr>
+            <td><strong>BID</strong></td>
+            <td><span class="tag tag-gray">CHỜ</span></td>
+            <td style="color:#94a3b8">41%</td>
+            <td>45,200đ</td>
+            <td>62 (bình thường)</td>
+            <td style="color:#64748b">0.0%</td>
+            <td style="color:#ef4444;font-size:12px">Ngoại bán mạnh</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── 5. QUẢN LÝ RỦI RO ── -->
+  <section class="section" id="risk">
+    <div class="section-title">🛡️ Quản lý rủi ro &amp; tự bảo vệ</div>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Hệ thống có nhiều cơ chế tự động để phát hiện khi mô hình đang hoạt động kém và tự điều chỉnh hoặc cảnh báo.</p>
+
+    <div class="risk-grid" style="margin-bottom:24px">
+      <div class="risk-card red">
+        <div class="risk-title" style="color:#dc2626">🔴 Circuit Breaker — Ngắt mạch tự động</div>
+        <div class="risk-desc">Giống cầu dao điện: nếu hiệu suất xấu đi đột ngột, hệ thống tự "mở" cầu dao và ngừng đưa ra tín hiệu MUA.</div>
+        <div style="margin-top:12px;font-size:13px">
+          <div style="margin-bottom:6px">🔴 <strong>OPEN (Ngắt)</strong> — Khi nào?</div>
+          <ul style="margin-left:16px;color:#475569;font-size:12px;line-height:1.8">
+            <li>Tỷ lệ thắng dưới 40% trong 20 lệnh gần nhất</li>
+            <li>Sharpe ratio âm (thua rủi ro phi lợi nhuận)</li>
+            <li>Thua lỗ quá 15% vốn</li>
+          </ul>
+          <div style="margin-top:8px;margin-bottom:4px">🟡 <strong>HALF-OPEN</strong> → 🟢 <strong>CLOSED</strong> (Phục hồi dần)</div>
+          <div style="color:#475569;font-size:12px">Sau khi cầu dao mở, thử lại với ngưỡng cao hơn. Chỉ đóng lại hoàn toàn khi hiệu suất thực sự ổn định.</div>
+        </div>
+      </div>
+
+      <div class="risk-card blue">
+        <div class="risk-title" style="color:#0369a1">📊 Drift Detection — Phát hiện lệch dữ liệu</div>
+        <div class="risk-desc">Theo dõi xem dữ liệu thị trường hiện tại có còn giống với dữ liệu mô hình đã học hay không.</div>
+        <div style="margin-top:12px;font-size:13px">
+          <div style="margin-bottom:6px"><strong>PSI (Population Stability Index)</strong></div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+            <div style="background:#f0fdf4;border-radius:6px;padding:6px 10px;color:#166534">✅ PSI &lt; 0.10 — Ổn định, không cần lo</div>
+            <div style="background:#fefce8;border-radius:6px;padding:6px 10px;color:#854d0e">⚠️ PSI 0.10–0.20 — Cảnh báo, theo dõi thêm</div>
+            <div style="background:#fff1f2;border-radius:6px;padding:6px 10px;color:#dc2626">🚨 PSI &gt; 0.20 — Cần retrain model ngay</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="risk-card green">
+        <div class="risk-title" style="color:#166534">📈 Bootstrap CI — Kiểm định thống kê</div>
+        <div class="risk-desc">Xác minh kết quả backtest không phải do may mắn bằng cách chạy 1,000 kịch bản giả lập ngẫu nhiên.</div>
+        <div style="margin-top:12px;font-size:13px;color:#475569">
+          <div style="margin-bottom:6px">Kết quả hiện tại:</div>
+          <div style="background:#dcfce7;border-radius:8px;padding:10px;font-size:13px">
+            Sharpe ratio thấp nhất trong 95% kịch bản = <strong style="color:#166534">3.5</strong><br>
+            <span style="font-size:12px;color:#16a34a">→ Xác suất &gt;97.5% rằng chiến lược thực sự có lợi thế</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="risk-card yellow">
+        <div class="risk-title" style="color:#854d0e">💼 Phân bổ vốn thông minh</div>
+        <div class="risk-desc">Khi có nhiều tín hiệu MUA cùng lúc, hệ thống đề xuất phân bổ vốn có kiểm soát.</div>
+        <div style="margin-top:12px;font-size:13px">
+          <ul style="margin-left:16px;color:#475569;font-size:12px;line-height:2">
+            <li>Tối đa <strong>5 vị thế</strong> cùng lúc (mặc định 50M VND)</li>
+            <li>Cổ phiếu chắc hơn (≥80%) được cấp vốn nhiều hơn 1.5×</li>
+            <li>Tối đa <strong>2 cổ phiếu/ngành</strong> để tránh tập trung rủi ro</li>
+            <li>Vốn cơ bản: <strong>10M VND/vị thế</strong></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout success">
+      <div class="callout-icon">🧪</div>
+      <div class="callout-text"><strong>Kiểm tra trước khi vận hành (Go-Live Checklist):</strong> Hệ thống có 9 điểm kiểm tra tự động trước khi deploy thực tế — từ chất lượng mô hình, benchmark với VN30, kiểm tra rò rỉ dữ liệu, đến cấu hình email và kết nối internet. Phải pass 9/9 mới được vận hành.</div>
+    </div>
+  </section>
+
+  <!-- ── 6. ĐẦU RA ── -->
+  <section class="section" id="output">
+    <div class="section-title">📤 Đầu ra &amp; trải nghiệm người dùng</div>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Kết quả phân tích được phân phối qua 2 kênh chính: dashboard web và email hàng ngày.</p>
+
+    <div class="grid-2" style="margin-bottom:24px">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span style="font-size:28px">🖥️</span>
+          <div>
+            <div style="font-weight:700;font-size:15px">Dashboard Web</div>
+            <div style="font-size:12px;color:#64748b">dmquan8198.github.io/vn30-signal</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>📊</span> Biểu đồ tăng trưởng vốn theo thời gian</div>
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>📅</span> Lợi nhuận theo từng tháng</div>
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>🎯</span> Bảng 30 mã với khuyến nghị &amp; độ chắc chắn</div>
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>💼</span> Đề xuất phân bổ vốn (khi có tín hiệu)</div>
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>📡</span> Trạng thái thị trường (BULL/BEAR/...)</div>
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>📰</span> Tin tức 24h theo từng mã</div>
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>📡</span> Hiệu quả dự đoán gần đây (live tracking)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span style="font-size:28px">📧</span>
+          <div>
+            <div style="font-weight:700;font-size:15px">Email hàng ngày</div>
+            <div style="font-size:12px;color:#64748b">Gmail SMTP · Gửi tự động sau 09:00</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>⭐</span> Danh sách các mã NÊN MUA hôm nay</div>
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>💰</span> Giá, độ chắc chắn, lợi suất 5 ngày qua</div>
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>🏷️</span> Gắn nhãn tin tức liên quan</div>
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>💼</span> Đề xuất phân bổ vốn cụ thể</div>
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>📡</span> Trạng thái thị trường hôm nay</div>
+          <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;display:flex;gap:8px"><span>⏸️</span> Danh sách các mã đang CHỜ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tracker -->
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px">📡 Hệ thống đánh giá kết quả thực tế (Tracker)</div>
+      <p style="font-size:13px;color:#475569;margin-bottom:16px">Khác với backtest (kiểm nghiệm trên dữ liệu lịch sử), Tracker theo dõi kết quả THỰC TẾ của từng tín hiệu đã gửi — sau 5 ngày giao dịch sẽ tự động đánh giá đúng/sai.</p>
+      <div class="grid-3">
+        <div style="text-align:center;padding:16px;background:#f8fafc;border-radius:12px">
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;text-transform:uppercase">Điểm tổng thể</div>
+          <div style="font-size:36px;font-weight:800;color:#1e293b">40<span style="font-size:16px;color:#94a3b8">/100</span></div>
+          <div style="font-size:12px;color:#f97316;margin-top:4px">Cần cải thiện (hệ thống còn mới)</div>
+        </div>
+        <div style="text-align:center;padding:16px;background:#f8fafc;border-radius:12px">
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;text-transform:uppercase">Thang điểm</div>
+          <div style="font-size:13px;line-height:2;color:#475569">
+            <span style="color:#10b981">70+ = Rất tốt</span><br>
+            <span style="color:#f59e0b">60–69 = Tốt</span><br>
+            <span style="color:#f97316">50–59 = TB</span><br>
+            <span style="color:#ef4444">&lt;50 = Cần xem lại</span>
+          </div>
+        </div>
+        <div style="text-align:center;padding:16px;background:#f8fafc;border-radius:12px">
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;text-transform:uppercase">Điểm = 50 là gì?</div>
+          <div style="font-size:13px;color:#475569;line-height:1.6">Tương đương đoán ngẫu nhiên. Hệ thống chỉ có giá trị khi điểm &gt;50 một cách ổn định.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 7. LỊCH VẬN HÀNH ── -->
+  <section class="section" id="schedule">
+    <div class="section-title">🕐 Lịch vận hành tự động</div>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Mọi thứ chạy hoàn toàn tự động qua cron job trên máy chủ. Không cần can thiệp thủ công trong điều kiện bình thường.</p>
+
+    <div class="card" style="margin-bottom:24px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:20px">📅 Lịch chạy hàng ngày (Thứ 2 – Thứ 6)</div>
+      <table class="clean">
+        <thead>
+          <tr><th>Thời gian</th><th>Tác vụ</th><th>Thời lượng</th><th>Đầu ra</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong style="color:#3b82f6">09:00</strong></td>
+            <td>Lấy dữ liệu mới + tạo tín hiệu buổi sáng + cập nhật dashboard + gửi email</td>
+            <td>~5–8 phút</td>
+            <td>signals/YYYY-MM-DD.csv · dashboard/index.html · Email</td>
+          </tr>
+          <tr>
+            <td><strong style="color:#3b82f6">13:30</strong></td>
+            <td>Cập nhật tin tức + foreign flow giữa phiên + rebuild dashboard</td>
+            <td>~3–5 phút</td>
+            <td>Cập nhật dashboard với tin tức mới nhất</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-bottom:24px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:20px">📅 Lịch vận hành hàng tuần</div>
+      <table class="clean">
+        <thead>
+          <tr><th>Thời gian</th><th>Tác vụ</th><th>Mục đích</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong style="color:#8b5cf6">Thứ 7 · 21:00</strong></td>
+            <td>Retrain toàn bộ mô hình AI</td>
+            <td>Cập nhật mô hình với dữ liệu thị trường mới nhất tuần vừa rồi</td>
+          </tr>
+          <tr>
+            <td><strong style="color:#8b5cf6">Thứ 7 · 21:30</strong></td>
+            <td>Kiểm tra drift (PSI) + circuit breaker</td>
+            <td>Phát hiện sớm nếu thị trường thay đổi đặc tính</td>
+          </tr>
+          <tr>
+            <td><strong style="color:#8b5cf6">Thứ 7 · 22:00</strong></td>
+            <td>Bootstrap CI validation</td>
+            <td>Xác nhận mô hình mới vẫn có lợi thế thống kê</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="pipe-num" style="background:#8b5cf6">1</div>
+        <div class="pipe-body">
+          <div class="pipe-title">Lấy dữ liệu mới nhất</div>
+          <div class="pipe-desc">Tải giá đóng cửa hôm nay của 30 mã VN30 + VNINDEX từ Vnstock. Tải macro (tỷ giá, dầu, VIX) từ Yahoo Finance.</div>
+        </div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num" style="background:#8b5cf6">2</div>
+        <div class="pipe-body">
+          <div class="pipe-title">Tính lại 60 chỉ số</div>
+          <div class="pipe-desc">Tính toán toàn bộ đặc trưng kỹ thuật, bối cảnh thị trường, vĩ mô và trạng thái thị trường cho ngày hôm nay.</div>
+        </div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num" style="background:#8b5cf6">3</div>
+        <div class="pipe-body">
+          <div class="pipe-title">Chạy 3 mô hình AI</div>
+          <div class="pipe-desc">Load model đã train sẵn. Đưa dữ liệu hôm nay vào → nhận dự đoán và xác suất. Biểu quyết đa số.</div>
+        </div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num" style="background:#8b5cf6">4</div>
+        <div class="pipe-body">
+          <div class="pipe-title">Lọc &amp; hiệu chỉnh</div>
+          <div class="pipe-desc">Calibrate độ chắc chắn. Áp ngưỡng động. Chạy overlay filters (dòng ngoại, tin nội bộ, kẹt sàn...).</div>
+        </div>
+      </div>
+      <div class="pipe-step" style="">
+        <div class="pipe-num" style="background:#10b981">5</div>
+        <div class="pipe-body" style="padding-bottom:0">
+          <div class="pipe-title">Phân phối kết quả</div>
+          <div class="pipe-desc">Lưu file tín hiệu. Rebuild dashboard HTML. Gửi email. Ghi nhận dự đoán vào tracker để đánh giá sau 5 ngày.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 8. THUẬT NGỮ ── -->
+  <section class="section" id="glossary">
+    <div class="section-title">📖 Thuật ngữ &amp; giải thích</div>
+    <div class="section-divider"></div>
+
+    <div class="card">
+      <div class="gloss-item">
+        <div class="gloss-term">Backtest</div>
+        <div class="gloss-def">Kiểm nghiệm chiến lược trên dữ liệu lịch sử để xem "nếu dùng mô hình này từ năm 2023 thì sẽ lời/lỗ bao nhiêu". Kết quả backtest tốt không đảm bảo tương lai tốt, nhưng là điều kiện cần thiết.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">Calibration</div>
+        <div class="gloss-def">Điều chỉnh độ chắc chắn của AI về đúng thực tế. Ví dụ: AI nói "80% chắc MUA" nhưng lịch sử cho thấy những lần nó nói vậy chỉ đúng 60% → hiệu chỉnh về 60%.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">Circuit Breaker</div>
+        <div class="gloss-def">Cơ chế tự ngắt tín hiệu khi hiệu suất xấu liên tiếp. Giống cầu dao điện trong nhà — bảo vệ trước khi tình huống trở nên tệ hơn.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">Drift (PSI)</div>
+        <div class="gloss-def">Khi thị trường thay đổi đặc tính (ví dụ: chuyển từ thị trường bình thường sang khủng hoảng), dữ liệu đầu vào sẽ "trôi" khỏi những gì mô hình đã học. PSI đo lường mức độ trôi này.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">Ensemble</div>
+        <div class="gloss-def">Dùng nhiều mô hình AI song song rồi lấy kết quả biểu quyết. Giống như hỏi 3 chuyên gia độc lập — kết quả đáng tin hơn là chỉ hỏi 1 người.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">Walk-Forward Validation</div>
+        <div class="gloss-def">Phương pháp kiểm thử mô hình nghiêm ngặt: luôn chỉ dùng dữ liệu quá khứ để dự đoán tương lai. Tránh "nhìn trộm" dữ liệu trong tương lai khi train — lỗi phổ biến làm backtest ảo.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">Sharpe Ratio</div>
+        <div class="gloss-def">Đo lường lợi nhuận tương đối với rủi ro. Sharpe = 1 là chấp nhận được, &gt;2 là tốt, &gt;3 là rất tốt. Hệ thống hiện có Sharpe ~3.5 theo bootstrap.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">VIX</div>
+        <div class="gloss-def">Chỉ số sợ hãi của thị trường toàn cầu (CBOE Volatility Index). VIX cao = nhà đầu tư toàn cầu đang lo lắng → thị trường Việt Nam thường bị ảnh hưởng theo.</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">RSI (14)</div>
+        <div class="gloss-def">Chỉ số sức mạnh tương đối (0–100). Dưới 30 = cổ phiếu đang bị bán quá mức (có thể phục hồi), trên 70 = đang mua quá mức (cẩn thận mua đỉnh).</div>
+      </div>
+      <div class="gloss-item">
+        <div class="gloss-term">OOF (Out-of-Fold)</div>
+        <div class="gloss-def">Dự đoán của mô hình trên phần dữ liệu nó chưa được "nhìn thấy" trong quá trình train. Dùng để hiệu chỉnh calibration một cách trung thực.</div>
+      </div>
+      <div class="gloss-item" style="border:none">
+        <div class="gloss-term">Regime (Trạng thái thị trường)</div>
+        <div class="gloss-def">Phân loại thị trường vào 4 trạng thái: 🔴 BEAR (giảm), ⚪ SIDEWAYS (đi ngang), 🟢 BULL (tăng), 🚀 BREAKOUT (phá đỉnh). Mỗi trạng thái có ngưỡng mua khác nhau.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div style="font-weight:700;color:#f8fafc;margin-bottom:6px">VN30 Signal System</div>
+  <div>Tài liệu tổng quan hệ thống · Phiên bản 2026 · Dành cho nội bộ</div>
+  <div style="margin-top:8px;font-size:11px;color:#475569">Hệ thống AI hỗ trợ quyết định — không phải tư vấn tài chính. Luôn quản lý rủi ro khi đầu tư.</div>
+</div>
+
+</body>
+</html>
