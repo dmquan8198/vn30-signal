@@ -105,12 +105,35 @@
   .market-sent-big { font-size:28px; font-weight:700; font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
 
   /* ── News popup ────────────────────────────────────── */
-  .news-popup { display:none; position:fixed; z-index:1000; background:#111827; border:1px solid var(--border); border-radius:var(--radius); padding:16px; max-width:380px; width:90%; box-shadow:0 24px 64px rgba(0,0,0,0.7); }
-  .news-popup.visible { display:block; }
-  .news-popup-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-  .news-popup-ticker { font-size:18px; font-weight:700; color:var(--text-primary); font-family:var(--font-mono); }
-  .news-popup-close { color:var(--text-muted); cursor:pointer; font-size:18px; line-height:1; padding:4px; transition:color var(--ease-out); border-radius:4px; }
-  .news-popup-close:hover { color:var(--text-primary); }
+  .news-popup {
+    display:none; position:fixed; z-index:1000;
+    background:#111827; border:1px solid var(--border); border-radius:var(--radius);
+    padding:0; max-width:420px; width:92%;
+    max-height:min(560px, 80dvh);
+    box-shadow:0 24px 64px rgba(0,0,0,0.75);
+    flex-direction:column;
+  }
+  .news-popup.visible { display:flex; }
+  .news-popup-header {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 16px 12px; border-bottom:1px solid var(--border-sub);
+    flex-shrink:0;
+  }
+  .news-popup-ticker { font-size:16px; font-weight:700; color:var(--text-primary); font-family:var(--font-mono); }
+  .news-popup-close {
+    color:var(--text-muted); cursor:pointer; font-size:18px; line-height:1;
+    padding:4px 6px; transition:color var(--ease-out); border-radius:4px;
+    flex-shrink:0;
+  }
+  .news-popup-close:hover { color:var(--text-primary); background:rgba(255,255,255,0.06); }
+  #popupContent {
+    overflow-y:auto; overscroll-behavior:contain;
+    padding:12px 16px 16px;
+    flex:1;
+  }
+  #popupContent::-webkit-scrollbar { width:4px; }
+  #popupContent::-webkit-scrollbar-track { background:transparent; }
+  #popupContent::-webkit-scrollbar-thumb { background:#334155; border-radius:2px; }
   .news-article { padding:10px 0; border-bottom:1px solid var(--border-sub); }
   .news-article:last-child { border-bottom:none; }
   .news-article a { color:#93c5fd; text-decoration:none; font-size:13px; line-height:1.5; display:block; transition:color var(--ease-out); }
@@ -119,7 +142,7 @@
   .sent-pos { color:var(--accent); }
   .sent-neg { color:var(--red); }
   .no-news-msg { color:var(--text-muted); font-size:13px; padding:8px 0; }
-  .popup-overlay { display:none; position:fixed; inset:0; z-index:999; }
+  .popup-overlay { display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.3); backdrop-filter:blur(2px); }
   .popup-overlay.visible { display:block; }
 
   /* ── News coverage ─────────────────────────────────── */
@@ -154,7 +177,7 @@
 <div class="header">
   <div>
     <h1>VN30 <span>Signal</span> Dashboard</h1>
-    <div class="meta">Tín hiệu ngày 2026-04-17 · Tạo lúc 19/04/2026 11:06 · Mô hình AI phân tích 60 chỉ số kỹ thuật</div>
+    <div class="meta">Tín hiệu ngày 2026-04-17 · Tạo lúc 19/04/2026 11:09 · Mô hình AI phân tích 60 chỉ số kỹ thuật</div>
   </div>
   <div style="text-align:right;display:flex;align-items:center;gap:10px">
     <span class="regime-badge" style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3)">Thị trường đang giảm 🔴</span>
@@ -716,12 +739,25 @@ function showNewsPopup(ticker, event) {
 
 function positionAndShow(event) {
   const popup = document.getElementById('newsPopup');
-  const vw = window.innerWidth, vh = window.innerHeight;
-  let x = event.clientX + 12, y = event.clientY + 12;
-  popup.style.left = Math.min(x, vw - 420) + 'px';
-  popup.style.top  = Math.min(y, vh - 320) + 'px';
+  const overlay = document.getElementById('popupOverlay');
+  // Show first so we can measure real height
   popup.classList.add('visible');
-  document.getElementById('popupOverlay').classList.add('visible');
+  overlay.classList.add('visible');
+  // Reset scroll position inside popup
+  const content = document.getElementById('popupContent');
+  if (content) content.scrollTop = 0;
+
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const pw = popup.offsetWidth  || 420;
+  const ph = popup.offsetHeight || 480;
+  const margin = 12;
+  let x = event.clientX + margin;
+  let y = event.clientY + margin;
+  // Clamp so popup never goes off screen
+  if (x + pw > vw - margin) x = Math.max(margin, event.clientX - pw - margin);
+  if (y + ph > vh - margin) y = Math.max(margin, vh - ph - margin);
+  popup.style.left = x + 'px';
+  popup.style.top  = y + 'px';
 }
 
 document.getElementById('popupClose').addEventListener('click', closePopup);
