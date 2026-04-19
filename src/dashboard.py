@@ -60,7 +60,7 @@ def build_monthly_pnl(trades: pd.DataFrame) -> dict:
     buy = trades[trades["direction"] == "BUY"].copy()
     buy["month"] = buy["date"].dt.to_period("M").astype(str)
     monthly = buy.groupby("month")["pnl"].sum().reset_index()
-    colors = ["#10b981" if v >= 0 else "#ef4444" for v in monthly["pnl"]]
+    colors = ["#22C55E" if v >= 0 else "#ef4444" for v in monthly["pnl"]]
     return {
         "labels": monthly["month"].tolist(),
         "values": (monthly["pnl"] / 1_000_000).round(2).tolist(),
@@ -400,97 +400,135 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VN30 Signal Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  * {{ margin:0; padding:0; box-sizing:border-box; }}
-  body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#0f172a; color:#e2e8f0; min-height:100vh; }}
+  /* ── Design tokens ─────────────────────────────────── */
+  :root {{
+    --bg:          #020617;
+    --bg-card:     #0E1223;
+    --bg-hover:    #131929;
+    --border:      #334155;
+    --border-sub:  #1e293b;
+    --accent:      #22C55E;
+    --accent-dim:  rgba(34,197,94,0.15);
+    --accent-glow: rgba(34,197,94,0.25);
+    --blue:        #60a5fa;
+    --blue-dim:    rgba(96,165,250,0.15);
+    --red:         #ef4444;
+    --red-dim:     rgba(239,68,68,0.12);
+    --text-primary:   #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted:     #475569;
+    --font-ui:   'Fira Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Fira Code', 'Fira Mono', monospace;
+    --radius:    12px;
+    --ease-out:  150ms cubic-bezier(0.16,1,0.3,1);
+  }}
 
-  /* Header */
-  .header {{ background:linear-gradient(135deg,#1e293b,#0f172a); border-bottom:1px solid #1e3a5f; padding:20px 32px; display:flex; align-items:center; justify-content:space-between; }}
-  .header h1 {{ font-size:22px; font-weight:700; color:#f8fafc; letter-spacing:-0.5px; }}
-  .header h1 span {{ color:#3b82f6; }}
-  .meta {{ font-size:13px; color:#64748b; margin-top:4px; }}
+  /* ── Reset ─────────────────────────────────────────── */
+  * {{ margin:0; padding:0; box-sizing:border-box; }}
+  body {{ font-family:var(--font-ui); background:var(--bg); color:var(--text-primary); min-height:100dvh; line-height:1.5; }}
+
+  /* ── Accessibility ─────────────────────────────────── */
+  :focus-visible {{ outline:2px solid var(--accent); outline-offset:3px; border-radius:4px; }}
+  @media (prefers-reduced-motion: reduce) {{
+    *, *::before, *::after {{ transition-duration:0ms !important; animation-duration:0ms !important; }}
+  }}
+
+  /* ── Header ────────────────────────────────────────── */
+  .header {{ background:linear-gradient(135deg,#0E1223,var(--bg)); border-bottom:1px solid var(--border); padding:20px 32px; display:flex; align-items:center; justify-content:space-between; }}
+  .header h1 {{ font-size:22px; font-weight:700; color:var(--text-primary); letter-spacing:-0.5px; }}
+  .header h1 span {{ color:var(--accent); }}
+  .meta {{ font-size:13px; color:var(--text-muted); margin-top:4px; }}
   .container {{ max-width:1400px; margin:0 auto; padding:24px 32px; }}
 
-  /* Stat cards */
+  /* ── Stat cards ────────────────────────────────────── */
   .stats-grid {{ display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:24px; }}
-  .stat-card {{ background:#1e293b; border:1px solid #1e3a5f; border-radius:12px; padding:20px; position:relative; }}
-  .stat-label {{ font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; display:flex; align-items:center; gap:5px; }}
-  .stat-value {{ font-size:28px; font-weight:700; color:#f8fafc; line-height:1; }}
-  .stat-sub {{ font-size:12px; color:#64748b; margin-top:6px; }}
+  .stat-card {{ background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; position:relative; transition:border-color var(--ease-out), background var(--ease-out); }}
+  .stat-card:hover {{ background:var(--bg-hover); border-color:#4b6480; }}
+  .stat-label {{ font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px; display:flex; align-items:center; gap:5px; font-weight:500; }}
+  .stat-value {{ font-size:28px; font-weight:700; color:var(--text-primary); line-height:1; font-variant-numeric:tabular-nums; font-family:var(--font-mono); }}
+  .stat-sub {{ font-size:12px; color:var(--text-muted); margin-top:8px; }}
 
-  /* Tooltip */
-  .tip {{ display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; background:#1e3a5f; color:#64748b; font-size:10px; cursor:help; position:relative; flex-shrink:0; }}
-  .tip:hover::after {{ content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:#1e3a5f; border:1px solid #334155; color:#e2e8f0; font-size:12px; padding:10px 14px; border-radius:8px; white-space:normal; max-width:340px; min-width:180px; z-index:100; line-height:1.6; text-transform:none; letter-spacing:0; font-weight:400; }}
-  .tip:hover::before {{ content:''; position:absolute; bottom:calc(100% + 1px); left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:#334155; }}
+  /* ── Tooltip ───────────────────────────────────────── */
+  .tip {{ display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; background:#1e293b; color:var(--text-muted); font-size:10px; cursor:help; position:relative; flex-shrink:0; transition:background var(--ease-out); }}
+  .tip:hover {{ background:#2d3f55; }}
+  .tip:hover::after {{ content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:#1a2438; border:1px solid var(--border); color:var(--text-primary); font-size:12px; padding:10px 14px; border-radius:8px; white-space:normal; max-width:340px; min-width:180px; z-index:100; line-height:1.6; text-transform:none; letter-spacing:0; font-weight:400; box-shadow:0 8px 32px rgba(0,0,0,0.5); }}
+  .tip:hover::before {{ content:''; position:absolute; bottom:calc(100% + 1px); left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:var(--border); }}
 
-  /* Layout */
+  /* ── Layout ────────────────────────────────────────── */
   .grid-2 {{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }}
   .grid-3 {{ display:grid; grid-template-columns:2fr 1fr; gap:20px; margin-bottom:24px; }}
-  .card {{ background:#1e293b; border:1px solid #1e3a5f; border-radius:12px; padding:20px; }}
-  .card-title {{ font-size:14px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }}
+  .card {{ background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; transition:border-color var(--ease-out); }}
+  .card:hover {{ border-color:#4b6480; }}
+  .card-title {{ font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.7px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }}
   .chart-wrap {{ position:relative; height:200px; }}
   .chart-wrap-tall {{ position:relative; height:240px; }}
 
-  /* Table */
+  /* ── Table ─────────────────────────────────────────── */
   table {{ width:100%; border-collapse:collapse; font-size:13px; }}
-  th {{ text-align:left; padding:10px 12px; color:#64748b; font-weight:500; font-size:11px; text-transform:uppercase; border-bottom:1px solid #1e3a5f; }}
+  th {{ text-align:left; padding:10px 12px; color:var(--text-muted); font-weight:500; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border); }}
   th .tip {{ margin-left:4px; }}
-  td {{ padding:10px 12px; border-bottom:1px solid #0f172a; vertical-align:middle; }}
-  .row-buy-strong {{ background:rgba(16,185,129,0.06); }}
-  .row-buy {{ background:rgba(59,130,246,0.04); }}
+  td {{ padding:10px 12px; border-bottom:1px solid var(--border-sub); vertical-align:middle; font-variant-numeric:tabular-nums; }}
+  .row-buy-strong {{ background:rgba(34,197,94,0.05); }}
+  .row-buy {{ background:rgba(96,165,250,0.04); }}
+  tr {{ transition:background var(--ease-out); }}
   tr:hover {{ background:rgba(255,255,255,0.04); cursor:pointer; }}
   .ticker-cell {{ font-weight:700; font-size:14px; }}
-  .ticker-link {{ color:#60a5fa; cursor:pointer; text-decoration:none; border-bottom:1px dashed #334155; }}
-  .ticker-link:hover {{ color:#93c5fd; border-bottom-color:#60a5fa; }}
-  .num {{ text-align:right; font-variant-numeric:tabular-nums; }}
+  .ticker-link {{ color:var(--blue); cursor:pointer; text-decoration:none; border-bottom:1px dashed var(--border); transition:color var(--ease-out), border-color var(--ease-out); }}
+  .ticker-link:hover {{ color:#93c5fd; border-bottom-color:var(--blue); }}
+  .num {{ text-align:right; font-variant-numeric:tabular-nums; font-family:var(--font-mono); }}
 
-  /* Badges */
+  /* ── Badges ────────────────────────────────────────── */
   .badge {{ display:inline-block; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600; }}
-  .badge-buy {{ background:rgba(16,185,129,0.2); color:#10b981; border:1px solid rgba(16,185,129,0.3); }}
-  .badge-buy-low {{ background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.2); }}
-  .badge-hold {{ background:rgba(100,116,139,0.15); color:#94a3b8; border:1px solid rgba(100,116,139,0.2); }}
+  .badge-buy {{ background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent-glow); }}
+  .badge-buy-low {{ background:var(--blue-dim); color:var(--blue); border:1px solid rgba(96,165,250,0.2); }}
+  .badge-hold {{ background:rgba(100,116,139,0.15); color:var(--text-secondary); border:1px solid rgba(100,116,139,0.2); }}
   .news-badge {{ display:inline-block; padding:2px 6px; border-radius:4px; font-size:10px; background:rgba(245,158,11,0.1); color:#f59e0b; }}
-  .news-badge-link {{ cursor:pointer; border-bottom:1px dashed rgba(245,158,11,0.4); }}
+  .news-badge-link {{ cursor:pointer; border-bottom:1px dashed rgba(245,158,11,0.4); transition:background var(--ease-out); }}
   .news-badge-link:hover {{ background:rgba(245,158,11,0.2); }}
 
-  /* Confidence bar */
+  /* ── Confidence bar ────────────────────────────────── */
   .conf-bar {{ display:flex; align-items:center; gap:8px; min-width:110px; }}
-  .conf-track {{ flex:1; height:6px; background:#1e3a5f; border-radius:3px; overflow:hidden; min-width:60px; }}
-  .conf-fill {{ height:100%; border-radius:3px; transition:width 0.3s; }}
+  .conf-track {{ flex:1; height:6px; background:#1e293b; border-radius:3px; overflow:hidden; min-width:60px; }}
+  .conf-fill {{ height:100%; border-radius:3px; transition:width 300ms cubic-bezier(0.16,1,0.3,1); }}
 
-  /* Regime badge */
+  /* ── Regime badge ──────────────────────────────────── */
   .regime-badge {{ display:inline-block; padding:4px 12px; border-radius:20px; font-size:13px; font-weight:600; }}
-  .market-sent-big {{ font-size:28px; font-weight:700; }}
+  .market-sent-big {{ font-size:28px; font-weight:700; font-family:var(--font-mono); font-variant-numeric:tabular-nums; }}
 
-  /* News popup */
-  .news-popup {{ display:none; position:fixed; z-index:1000; background:#1e293b; border:1px solid #334155; border-radius:12px; padding:16px; max-width:380px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.6); }}
+  /* ── News popup ────────────────────────────────────── */
+  .news-popup {{ display:none; position:fixed; z-index:1000; background:#111827; border:1px solid var(--border); border-radius:var(--radius); padding:16px; max-width:380px; width:90%; box-shadow:0 24px 64px rgba(0,0,0,0.7); }}
   .news-popup.visible {{ display:block; }}
   .news-popup-header {{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }}
-  .news-popup-ticker {{ font-size:18px; font-weight:700; color:#f8fafc; }}
-  .news-popup-close {{ color:#64748b; cursor:pointer; font-size:18px; line-height:1; padding:4px; }}
-  .news-popup-close:hover {{ color:#f8fafc; }}
-  .news-article {{ padding:10px 0; border-bottom:1px solid #1e3a5f; }}
+  .news-popup-ticker {{ font-size:18px; font-weight:700; color:var(--text-primary); font-family:var(--font-mono); }}
+  .news-popup-close {{ color:var(--text-muted); cursor:pointer; font-size:18px; line-height:1; padding:4px; transition:color var(--ease-out); border-radius:4px; }}
+  .news-popup-close:hover {{ color:var(--text-primary); }}
+  .news-article {{ padding:10px 0; border-bottom:1px solid var(--border-sub); }}
   .news-article:last-child {{ border-bottom:none; }}
-  .news-article a {{ color:#93c5fd; text-decoration:none; font-size:13px; line-height:1.5; display:block; }}
-  .news-article a:hover {{ color:#60a5fa; text-decoration:underline; }}
-  .news-article-meta {{ font-size:11px; color:#64748b; margin-top:3px; display:flex; gap:8px; }}
-  .sent-pos {{ color:#10b981; }}
-  .sent-neg {{ color:#ef4444; }}
-  .no-news-msg {{ color:#64748b; font-size:13px; padding:8px 0; }}
+  .news-article a {{ color:#93c5fd; text-decoration:none; font-size:13px; line-height:1.5; display:block; transition:color var(--ease-out); }}
+  .news-article a:hover {{ color:var(--blue); text-decoration:underline; }}
+  .news-article-meta {{ font-size:11px; color:var(--text-muted); margin-top:3px; display:flex; gap:8px; font-variant-numeric:tabular-nums; }}
+  .sent-pos {{ color:var(--accent); }}
+  .sent-neg {{ color:var(--red); }}
+  .no-news-msg {{ color:var(--text-muted); font-size:13px; padding:8px 0; }}
   .popup-overlay {{ display:none; position:fixed; inset:0; z-index:999; }}
   .popup-overlay.visible {{ display:block; }}
 
-  /* News coverage */
-  .news-ticker-row {{ display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #1e3a5f; cursor:pointer; }}
+  /* ── News coverage ─────────────────────────────────── */
+  .news-ticker-row {{ display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border-sub); cursor:pointer; transition:background var(--ease-out), padding-left var(--ease-out); border-radius:0; }}
   .news-ticker-row:last-child {{ border-bottom:none; }}
-  .news-ticker-row:hover {{ background:rgba(255,255,255,0.03); border-radius:6px; padding-left:4px; }}
-  .news-ticker-name {{ font-weight:600; color:#f8fafc; }}
+  .news-ticker-row:hover {{ background:rgba(255,255,255,0.03); border-radius:6px; padding-left:6px; }}
+  .news-ticker-name {{ font-weight:600; color:var(--text-primary); }}
 
-  /* Explain boxes */
-  .explain-box {{ background:#162032; border:1px solid #1e3a5f; border-radius:8px; padding:12px 16px; font-size:12px; color:#94a3b8; line-height:1.6; margin-bottom:16px; }}
+  /* ── Explain boxes ─────────────────────────────────── */
+  .explain-box {{ background:#0a1120; border:1px solid var(--border-sub); border-radius:8px; padding:12px 16px; font-size:12px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px; }}
   .explain-box strong {{ color:#cbd5e1; }}
 
+  /* ── Responsive ────────────────────────────────────── */
   @media (max-width:900px) {{
     .stats-grid {{ grid-template-columns:repeat(2,1fr); }}
     .grid-2, .grid-3 {{ grid-template-columns:1fr; }}
@@ -529,7 +567,7 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
         Cơ hội mua hôm nay
         <span class="tip" data-tip="Số mã cổ phiếu mà AI đánh giá là có khả năng tăng giá trong 5 ngày tới. ⭐ là những mã AI tự tin nhất (≥60%).">?</span>
       </div>
-      <div class="stat-value" style="color:#10b981">{n_buy}</div>
+      <div class="stat-value" style="color:var(--accent)">{n_buy}</div>
       <div class="stat-sub">{n_actionable} mã AI tự tin cao ⭐</div>
     </div>
     <div class="stat-card">
@@ -537,7 +575,7 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
         Lợi nhuận backtest
         <span class="tip" data-tip="Tổng lợi nhuận giả định nếu mua 10 triệu/lần theo tín hiệu BUY từ năm 2023 đến nay, đã trừ phí giao dịch 0.15%/chiều.">?</span>
       </div>
-      <div class="stat-value" style="color:{'#10b981' if total_pnl>=0 else '#ef4444'}">{total_pnl:+.1f}M</div>
+      <div class="stat-value" style="color:{'var(--accent)' if total_pnl>=0 else 'var(--red)'}">{total_pnl:+.1f}M</div>
       <div class="stat-sub">Kiểm nghiệm 2023–2026</div>
     </div>
     <div class="stat-card">
@@ -545,7 +583,7 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
         Tỷ lệ thắng
         <span class="tip" data-tip="Tỷ lệ các lần mua theo tín hiệu AI có lời sau 5 ngày — tính trên toàn bộ backtest lịch sử 2023–2026 ({total_trades} lệnh). Xem 'Hiệu quả dự đoán gần đây' để biết kết quả live.">?</span>
       </div>
-      <div class="stat-value" style="color:#3b82f6">{win_rate:.1f}%</div>
+      <div class="stat-value" style="color:var(--blue)">{win_rate:.1f}%</div>
       <div class="stat-sub">{total_trades} lần mua trong backtest</div>
     </div>
     <div class="stat-card">
@@ -553,7 +591,7 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
         Lãi TB mỗi lần mua
         <span class="tip" data-tip="Lợi nhuận trung bình mỗi lần mua theo tín hiệu AI, tính theo % giá cổ phiếu sau 5 ngày nắm giữ, đã trừ phí.">?</span>
       </div>
-      <div class="stat-value" style="color:{'#10b981' if avg_ret>=0 else '#ef4444'}">{avg_ret:+.2f}%</div>
+      <div class="stat-value" style="color:{'var(--accent)' if avg_ret>=0 else 'var(--red)'}">{avg_ret:+.2f}%</div>
       <div class="stat-sub">Sau phí giao dịch</div>
     </div>
     <div class="stat-card">
@@ -664,8 +702,8 @@ const tickerArticles = {articles_j};
 
 // Chart defaults
 Chart.defaults.color = '#94a3b8';
-Chart.defaults.borderColor = '#1e3a5f';
-Chart.defaults.font = {{ family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", size: 11 }};
+Chart.defaults.borderColor = '#1e293b';
+Chart.defaults.font = {{ family: "'Fira Sans', -apple-system, BlinkMacSystemFont, sans-serif", size: 11 }};
 
 // Cumulative P&L
 new Chart(document.getElementById('cumChart'), {{
@@ -674,8 +712,8 @@ new Chart(document.getElementById('cumChart'), {{
     labels: cumulative.labels,
     datasets: [{{
       data: cumulative.values,
-      borderColor: '#3b82f6',
-      backgroundColor: 'rgba(59,130,246,0.08)',
+      borderColor: '#22C55E',
+      backgroundColor: 'rgba(34,197,94,0.07)',
       fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2,
     }}]
   }},
@@ -683,8 +721,8 @@ new Chart(document.getElementById('cumChart'), {{
     responsive: true, maintainAspectRatio: false,
     plugins: {{ legend: {{ display: false }}, tooltip: {{ callbacks: {{ label: ctx => ' ' + ctx.parsed.y.toFixed(1) + ' triệu VND' }} }} }},
     scales: {{
-      x: {{ ticks: {{ maxTicksLimit: 6 }}, grid: {{ color: '#1e293b' }} }},
-      y: {{ ticks: {{ callback: v => v + 'M' }}, grid: {{ color: '#1e293b' }} }}
+      x: {{ ticks: {{ maxTicksLimit: 6 }}, grid: {{ color: '#0f172a' }} }},
+      y: {{ ticks: {{ callback: v => v + 'M' }}, grid: {{ color: '#0f172a' }} }}
     }}
   }}
 }});
@@ -704,8 +742,8 @@ new Chart(document.getElementById('monthChart'), {{
     responsive: true, maintainAspectRatio: false,
     plugins: {{ legend: {{ display: false }}, tooltip: {{ callbacks: {{ label: ctx => ' ' + ctx.parsed.y.toFixed(1) + ' triệu VND' }} }} }},
     scales: {{
-      x: {{ ticks: {{ maxTicksLimit: 8 }}, grid: {{ color: '#1e293b' }} }},
-      y: {{ ticks: {{ callback: v => v + 'M' }}, grid: {{ color: '#1e293b' }} }}
+      x: {{ ticks: {{ maxTicksLimit: 8 }}, grid: {{ color: '#0f172a' }} }},
+      y: {{ ticks: {{ callback: v => v + 'M' }}, grid: {{ color: '#0f172a' }} }}
     }}
   }}
 }});
@@ -718,7 +756,7 @@ new Chart(document.getElementById('confChart'), {{
     datasets: [{{
       label: 'Số mã',
       data: confDist.values,
-      backgroundColor: ['#334155','#334155','#334155','#3b82f6','#10b981','#10b981'],
+      backgroundColor: ['#1e293b','#1e293b','#1e293b','#60a5fa','#22C55E','#22C55E'],
       borderRadius: 4,
     }}]
   }},

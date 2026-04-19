@@ -4,97 +4,135 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VN30 Signal Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#0f172a; color:#e2e8f0; min-height:100vh; }
+  /* ── Design tokens ─────────────────────────────────── */
+  :root {
+    --bg:          #020617;
+    --bg-card:     #0E1223;
+    --bg-hover:    #131929;
+    --border:      #334155;
+    --border-sub:  #1e293b;
+    --accent:      #22C55E;
+    --accent-dim:  rgba(34,197,94,0.15);
+    --accent-glow: rgba(34,197,94,0.25);
+    --blue:        #60a5fa;
+    --blue-dim:    rgba(96,165,250,0.15);
+    --red:         #ef4444;
+    --red-dim:     rgba(239,68,68,0.12);
+    --text-primary:   #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted:     #475569;
+    --font-ui:   'Fira Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Fira Code', 'Fira Mono', monospace;
+    --radius:    12px;
+    --ease-out:  150ms cubic-bezier(0.16,1,0.3,1);
+  }
 
-  /* Header */
-  .header { background:linear-gradient(135deg,#1e293b,#0f172a); border-bottom:1px solid #1e3a5f; padding:20px 32px; display:flex; align-items:center; justify-content:space-between; }
-  .header h1 { font-size:22px; font-weight:700; color:#f8fafc; letter-spacing:-0.5px; }
-  .header h1 span { color:#3b82f6; }
-  .meta { font-size:13px; color:#64748b; margin-top:4px; }
+  /* ── Reset ─────────────────────────────────────────── */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:var(--font-ui); background:var(--bg); color:var(--text-primary); min-height:100dvh; line-height:1.5; }
+
+  /* ── Accessibility ─────────────────────────────────── */
+  :focus-visible { outline:2px solid var(--accent); outline-offset:3px; border-radius:4px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration:0ms !important; animation-duration:0ms !important; }
+  }
+
+  /* ── Header ────────────────────────────────────────── */
+  .header { background:linear-gradient(135deg,#0E1223,var(--bg)); border-bottom:1px solid var(--border); padding:20px 32px; display:flex; align-items:center; justify-content:space-between; }
+  .header h1 { font-size:22px; font-weight:700; color:var(--text-primary); letter-spacing:-0.5px; }
+  .header h1 span { color:var(--accent); }
+  .meta { font-size:13px; color:var(--text-muted); margin-top:4px; }
   .container { max-width:1400px; margin:0 auto; padding:24px 32px; }
 
-  /* Stat cards */
+  /* ── Stat cards ────────────────────────────────────── */
   .stats-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:24px; }
-  .stat-card { background:#1e293b; border:1px solid #1e3a5f; border-radius:12px; padding:20px; position:relative; }
-  .stat-label { font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; display:flex; align-items:center; gap:5px; }
-  .stat-value { font-size:28px; font-weight:700; color:#f8fafc; line-height:1; }
-  .stat-sub { font-size:12px; color:#64748b; margin-top:6px; }
+  .stat-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; position:relative; transition:border-color var(--ease-out), background var(--ease-out); }
+  .stat-card:hover { background:var(--bg-hover); border-color:#4b6480; }
+  .stat-label { font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px; display:flex; align-items:center; gap:5px; font-weight:500; }
+  .stat-value { font-size:28px; font-weight:700; color:var(--text-primary); line-height:1; font-variant-numeric:tabular-nums; font-family:var(--font-mono); }
+  .stat-sub { font-size:12px; color:var(--text-muted); margin-top:8px; }
 
-  /* Tooltip */
-  .tip { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; background:#1e3a5f; color:#64748b; font-size:10px; cursor:help; position:relative; flex-shrink:0; }
-  .tip:hover::after { content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:#1e3a5f; border:1px solid #334155; color:#e2e8f0; font-size:12px; padding:10px 14px; border-radius:8px; white-space:normal; max-width:340px; min-width:180px; z-index:100; line-height:1.6; text-transform:none; letter-spacing:0; font-weight:400; }
-  .tip:hover::before { content:''; position:absolute; bottom:calc(100% + 1px); left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:#334155; }
+  /* ── Tooltip ───────────────────────────────────────── */
+  .tip { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; background:#1e293b; color:var(--text-muted); font-size:10px; cursor:help; position:relative; flex-shrink:0; transition:background var(--ease-out); }
+  .tip:hover { background:#2d3f55; }
+  .tip:hover::after { content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:#1a2438; border:1px solid var(--border); color:var(--text-primary); font-size:12px; padding:10px 14px; border-radius:8px; white-space:normal; max-width:340px; min-width:180px; z-index:100; line-height:1.6; text-transform:none; letter-spacing:0; font-weight:400; box-shadow:0 8px 32px rgba(0,0,0,0.5); }
+  .tip:hover::before { content:''; position:absolute; bottom:calc(100% + 1px); left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:var(--border); }
 
-  /* Layout */
+  /* ── Layout ────────────────────────────────────────── */
   .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
   .grid-3 { display:grid; grid-template-columns:2fr 1fr; gap:20px; margin-bottom:24px; }
-  .card { background:#1e293b; border:1px solid #1e3a5f; border-radius:12px; padding:20px; }
-  .card-title { font-size:14px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; transition:border-color var(--ease-out); }
+  .card:hover { border-color:#4b6480; }
+  .card-title { font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.7px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
   .chart-wrap { position:relative; height:200px; }
   .chart-wrap-tall { position:relative; height:240px; }
 
-  /* Table */
+  /* ── Table ─────────────────────────────────────────── */
   table { width:100%; border-collapse:collapse; font-size:13px; }
-  th { text-align:left; padding:10px 12px; color:#64748b; font-weight:500; font-size:11px; text-transform:uppercase; border-bottom:1px solid #1e3a5f; }
+  th { text-align:left; padding:10px 12px; color:var(--text-muted); font-weight:500; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border); }
   th .tip { margin-left:4px; }
-  td { padding:10px 12px; border-bottom:1px solid #0f172a; vertical-align:middle; }
-  .row-buy-strong { background:rgba(16,185,129,0.06); }
-  .row-buy { background:rgba(59,130,246,0.04); }
+  td { padding:10px 12px; border-bottom:1px solid var(--border-sub); vertical-align:middle; font-variant-numeric:tabular-nums; }
+  .row-buy-strong { background:rgba(34,197,94,0.05); }
+  .row-buy { background:rgba(96,165,250,0.04); }
+  tr { transition:background var(--ease-out); }
   tr:hover { background:rgba(255,255,255,0.04); cursor:pointer; }
   .ticker-cell { font-weight:700; font-size:14px; }
-  .ticker-link { color:#60a5fa; cursor:pointer; text-decoration:none; border-bottom:1px dashed #334155; }
-  .ticker-link:hover { color:#93c5fd; border-bottom-color:#60a5fa; }
-  .num { text-align:right; font-variant-numeric:tabular-nums; }
+  .ticker-link { color:var(--blue); cursor:pointer; text-decoration:none; border-bottom:1px dashed var(--border); transition:color var(--ease-out), border-color var(--ease-out); }
+  .ticker-link:hover { color:#93c5fd; border-bottom-color:var(--blue); }
+  .num { text-align:right; font-variant-numeric:tabular-nums; font-family:var(--font-mono); }
 
-  /* Badges */
+  /* ── Badges ────────────────────────────────────────── */
   .badge { display:inline-block; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600; }
-  .badge-buy { background:rgba(16,185,129,0.2); color:#10b981; border:1px solid rgba(16,185,129,0.3); }
-  .badge-buy-low { background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.2); }
-  .badge-hold { background:rgba(100,116,139,0.15); color:#94a3b8; border:1px solid rgba(100,116,139,0.2); }
+  .badge-buy { background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent-glow); }
+  .badge-buy-low { background:var(--blue-dim); color:var(--blue); border:1px solid rgba(96,165,250,0.2); }
+  .badge-hold { background:rgba(100,116,139,0.15); color:var(--text-secondary); border:1px solid rgba(100,116,139,0.2); }
   .news-badge { display:inline-block; padding:2px 6px; border-radius:4px; font-size:10px; background:rgba(245,158,11,0.1); color:#f59e0b; }
-  .news-badge-link { cursor:pointer; border-bottom:1px dashed rgba(245,158,11,0.4); }
+  .news-badge-link { cursor:pointer; border-bottom:1px dashed rgba(245,158,11,0.4); transition:background var(--ease-out); }
   .news-badge-link:hover { background:rgba(245,158,11,0.2); }
 
-  /* Confidence bar */
+  /* ── Confidence bar ────────────────────────────────── */
   .conf-bar { display:flex; align-items:center; gap:8px; min-width:110px; }
-  .conf-track { flex:1; height:6px; background:#1e3a5f; border-radius:3px; overflow:hidden; min-width:60px; }
-  .conf-fill { height:100%; border-radius:3px; transition:width 0.3s; }
+  .conf-track { flex:1; height:6px; background:#1e293b; border-radius:3px; overflow:hidden; min-width:60px; }
+  .conf-fill { height:100%; border-radius:3px; transition:width 300ms cubic-bezier(0.16,1,0.3,1); }
 
-  /* Regime badge */
+  /* ── Regime badge ──────────────────────────────────── */
   .regime-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:13px; font-weight:600; }
-  .market-sent-big { font-size:28px; font-weight:700; }
+  .market-sent-big { font-size:28px; font-weight:700; font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
 
-  /* News popup */
-  .news-popup { display:none; position:fixed; z-index:1000; background:#1e293b; border:1px solid #334155; border-radius:12px; padding:16px; max-width:380px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
+  /* ── News popup ────────────────────────────────────── */
+  .news-popup { display:none; position:fixed; z-index:1000; background:#111827; border:1px solid var(--border); border-radius:var(--radius); padding:16px; max-width:380px; width:90%; box-shadow:0 24px 64px rgba(0,0,0,0.7); }
   .news-popup.visible { display:block; }
   .news-popup-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-  .news-popup-ticker { font-size:18px; font-weight:700; color:#f8fafc; }
-  .news-popup-close { color:#64748b; cursor:pointer; font-size:18px; line-height:1; padding:4px; }
-  .news-popup-close:hover { color:#f8fafc; }
-  .news-article { padding:10px 0; border-bottom:1px solid #1e3a5f; }
+  .news-popup-ticker { font-size:18px; font-weight:700; color:var(--text-primary); font-family:var(--font-mono); }
+  .news-popup-close { color:var(--text-muted); cursor:pointer; font-size:18px; line-height:1; padding:4px; transition:color var(--ease-out); border-radius:4px; }
+  .news-popup-close:hover { color:var(--text-primary); }
+  .news-article { padding:10px 0; border-bottom:1px solid var(--border-sub); }
   .news-article:last-child { border-bottom:none; }
-  .news-article a { color:#93c5fd; text-decoration:none; font-size:13px; line-height:1.5; display:block; }
-  .news-article a:hover { color:#60a5fa; text-decoration:underline; }
-  .news-article-meta { font-size:11px; color:#64748b; margin-top:3px; display:flex; gap:8px; }
-  .sent-pos { color:#10b981; }
-  .sent-neg { color:#ef4444; }
-  .no-news-msg { color:#64748b; font-size:13px; padding:8px 0; }
+  .news-article a { color:#93c5fd; text-decoration:none; font-size:13px; line-height:1.5; display:block; transition:color var(--ease-out); }
+  .news-article a:hover { color:var(--blue); text-decoration:underline; }
+  .news-article-meta { font-size:11px; color:var(--text-muted); margin-top:3px; display:flex; gap:8px; font-variant-numeric:tabular-nums; }
+  .sent-pos { color:var(--accent); }
+  .sent-neg { color:var(--red); }
+  .no-news-msg { color:var(--text-muted); font-size:13px; padding:8px 0; }
   .popup-overlay { display:none; position:fixed; inset:0; z-index:999; }
   .popup-overlay.visible { display:block; }
 
-  /* News coverage */
-  .news-ticker-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #1e3a5f; cursor:pointer; }
+  /* ── News coverage ─────────────────────────────────── */
+  .news-ticker-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border-sub); cursor:pointer; transition:background var(--ease-out), padding-left var(--ease-out); border-radius:0; }
   .news-ticker-row:last-child { border-bottom:none; }
-  .news-ticker-row:hover { background:rgba(255,255,255,0.03); border-radius:6px; padding-left:4px; }
-  .news-ticker-name { font-weight:600; color:#f8fafc; }
+  .news-ticker-row:hover { background:rgba(255,255,255,0.03); border-radius:6px; padding-left:6px; }
+  .news-ticker-name { font-weight:600; color:var(--text-primary); }
 
-  /* Explain boxes */
-  .explain-box { background:#162032; border:1px solid #1e3a5f; border-radius:8px; padding:12px 16px; font-size:12px; color:#94a3b8; line-height:1.6; margin-bottom:16px; }
+  /* ── Explain boxes ─────────────────────────────────── */
+  .explain-box { background:#0a1120; border:1px solid var(--border-sub); border-radius:8px; padding:12px 16px; font-size:12px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px; }
   .explain-box strong { color:#cbd5e1; }
 
+  /* ── Responsive ────────────────────────────────────── */
   @media (max-width:900px) {
     .stats-grid { grid-template-columns:repeat(2,1fr); }
     .grid-2, .grid-3 { grid-template-columns:1fr; }
@@ -116,7 +154,7 @@
 <div class="header">
   <div>
     <h1>VN30 <span>Signal</span> Dashboard</h1>
-    <div class="meta">Tín hiệu ngày 2026-04-17 · Tạo lúc 19/04/2026 10:55 · Mô hình AI phân tích 60 chỉ số kỹ thuật</div>
+    <div class="meta">Tín hiệu ngày 2026-04-17 · Tạo lúc 19/04/2026 11:06 · Mô hình AI phân tích 60 chỉ số kỹ thuật</div>
   </div>
   <div style="text-align:right;display:flex;align-items:center;gap:10px">
     <span class="regime-badge" style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3)">Thị trường đang giảm 🔴</span>
@@ -148,7 +186,7 @@
         Cơ hội mua hôm nay
         <span class="tip" data-tip="Số mã cổ phiếu mà AI đánh giá là có khả năng tăng giá trong 5 ngày tới. ⭐ là những mã AI tự tin nhất (≥60%).">?</span>
       </div>
-      <div class="stat-value" style="color:#10b981">0</div>
+      <div class="stat-value" style="color:var(--accent)">0</div>
       <div class="stat-sub">0 mã AI tự tin cao ⭐</div>
     </div>
     <div class="stat-card">
@@ -156,7 +194,7 @@
         Lợi nhuận backtest
         <span class="tip" data-tip="Tổng lợi nhuận giả định nếu mua 10 triệu/lần theo tín hiệu BUY từ năm 2023 đến nay, đã trừ phí giao dịch 0.15%/chiều.">?</span>
       </div>
-      <div class="stat-value" style="color:#10b981">+51.1M</div>
+      <div class="stat-value" style="color:var(--accent)">+51.1M</div>
       <div class="stat-sub">Kiểm nghiệm 2023–2026</div>
     </div>
     <div class="stat-card">
@@ -164,7 +202,7 @@
         Tỷ lệ thắng
         <span class="tip" data-tip="Tỷ lệ các lần mua theo tín hiệu AI có lời sau 5 ngày — tính trên toàn bộ backtest lịch sử 2023–2026 (206 lệnh). Xem 'Hiệu quả dự đoán gần đây' để biết kết quả live.">?</span>
       </div>
-      <div class="stat-value" style="color:#3b82f6">65.5%</div>
+      <div class="stat-value" style="color:var(--blue)">65.5%</div>
       <div class="stat-sub">206 lần mua trong backtest</div>
     </div>
     <div class="stat-card">
@@ -172,7 +210,7 @@
         Lãi TB mỗi lần mua
         <span class="tip" data-tip="Lợi nhuận trung bình mỗi lần mua theo tín hiệu AI, tính theo % giá cổ phiếu sau 5 ngày nắm giữ, đã trừ phí.">?</span>
       </div>
-      <div class="stat-value" style="color:#10b981">+2.48%</div>
+      <div class="stat-value" style="color:var(--accent)">+2.48%</div>
       <div class="stat-sub">Sau phí giao dịch</div>
     </div>
     <div class="stat-card">
@@ -538,15 +576,15 @@
 </div>
 
 <script>
-const monthly = {"labels": ["2023-04", "2023-08", "2024-03", "2025-04", "2025-05", "2025-07", "2025-08", "2025-11", "2026-01", "2026-02", "2026-03"], "values": [0.01, 0.52, 1.15, 39.37, 12.61, 1.09, 0.19, 1.14, -0.15, 4.71, -9.51], "colors": ["#10b981", "#10b981", "#10b981", "#10b981", "#10b981", "#10b981", "#10b981", "#10b981", "#ef4444", "#10b981", "#ef4444"]};
+const monthly = {"labels": ["2023-04", "2023-08", "2024-03", "2025-04", "2025-05", "2025-07", "2025-08", "2025-11", "2026-01", "2026-02", "2026-03"], "values": [0.01, 0.52, 1.15, 39.37, 12.61, 1.09, 0.19, 1.14, -0.15, 4.71, -9.51], "colors": ["#22C55E", "#22C55E", "#22C55E", "#22C55E", "#22C55E", "#22C55E", "#22C55E", "#22C55E", "#ef4444", "#22C55E", "#ef4444"]};
 const cumulative = {"labels": ["2023-04-20", "2023-04-24", "2023-08-08", "2024-03-06", "2025-04-04", "2025-04-04", "2025-04-04", "2025-04-04", "2025-04-04", "2025-04-04", "2025-04-04", "2025-04-04", "2025-04-04", "2025-04-04", "2025-04-04", "2025-04-04", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-08", "2025-04-09", "2025-04-09", "2025-04-09", "2025-04-09", "2025-04-09", "2025-04-09", "2025-04-09", "2025-04-09", "2025-04-09", "2025-04-09", "2025-04-10", "2025-04-11", "2025-04-11", "2025-04-11", "2025-04-14", "2025-04-14", "2025-04-15", "2025-04-15", "2025-04-15", "2025-04-15", "2025-04-15", "2025-04-15", "2025-04-15", "2025-04-15", "2025-04-15", "2025-04-15", "2025-04-15", "2025-04-15", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-16", "2025-04-17", "2025-04-17", "2025-04-17", "2025-04-17", "2025-04-17", "2025-04-17", "2025-04-17", "2025-04-17", "2025-04-17", "2025-04-18", "2025-04-18", "2025-04-18", "2025-04-18", "2025-04-18", "2025-04-21", "2025-04-21", "2025-04-21", "2025-04-21", "2025-04-21", "2025-04-22", "2025-04-22", "2025-04-23", "2025-04-23", "2025-04-24", "2025-04-24", "2025-04-24", "2025-04-25", "2025-04-25", "2025-04-25", "2025-04-28", "2025-04-28", "2025-04-28", "2025-04-28", "2025-04-29", "2025-04-29", "2025-04-29", "2025-04-29", "2025-04-29", "2025-04-29", "2025-04-29", "2025-04-29", "2025-05-05", "2025-05-05", "2025-05-05", "2025-05-05", "2025-05-05", "2025-05-05", "2025-05-05", "2025-05-05", "2025-05-06", "2025-05-06", "2025-05-06", "2025-05-06", "2025-05-07", "2025-05-07", "2025-05-07", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-17", "2025-07-25", "2025-08-14", "2025-11-05", "2025-11-05", "2025-11-06", "2025-11-06", "2025-11-06", "2025-11-06", "2025-11-06", "2025-11-06", "2025-11-06", "2025-11-06", "2025-11-13", "2025-11-13", "2025-11-14", "2025-11-24", "2026-01-15", "2026-02-05", "2026-02-05", "2026-02-06", "2026-02-10", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-09", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-10", "2026-03-11", "2026-03-11", "2026-03-12", "2026-03-12", "2026-03-12", "2026-03-13", "2026-03-13", "2026-03-16", "2026-03-16", "2026-03-16", "2026-03-16", "2026-03-17", "2026-03-17"], "values": [-0.01, 0.01, 0.53, 1.68, 1.12, 0.85, 0.91, 1.12, 0.32, 0.2, 0.48, 0.59, 0.44, 1.83, 2.52, 2.84, 3.35, 4.75, 5.2, 6.78, 6.86, 7.59, 8.59, 9.57, 8.8, 10.06, 10.69, 11.75, 12.33, 12.7, 13.55, 14.36, 15.22, 15.94, 16.4, 17.23, 19.48, 21.44, 22.57, 23.48, 24.88, 25.51, 26.25, 27.49, 28.67, 29.71, 29.13, 29.62, 28.63, 28.03, 28.86, 27.95, 29.01, 29.01, 28.53, 28.36, 28.18, 27.67, 27.47, 27.91, 27.63, 26.81, 26.66, 25.77, 25.59, 26.39, 26.41, 26.22, 26.13, 26.22, 25.97, 25.97, 26.17, 26.68, 26.67, 27.21, 27.08, 27.47, 27.58, 27.9, 28.15, 28.11, 27.97, 27.88, 27.59, 28.26, 28.18, 28.4, 28.82, 29.03, 29.01, 29.36, 29.29, 28.98, 29.02, 29.32, 29.98, 29.86, 30.29, 30.87, 31.59, 31.37, 31.91, 32.51, 32.94, 33.64, 33.93, 33.99, 33.76, 33.49, 33.69, 34.1, 34.84, 35.25, 35.3, 36.57, 37.78, 37.99, 38.56, 39.35, 39.73, 40.45, 40.91, 41.04, 41.37, 42.03, 43.35, 43.41, 44.27, 44.83, 44.72, 45.93, 46.39, 47.4, 48.26, 50.02, 51.26, 52.74, 53.66, 54.12, 54.3, 54.04, 54.05, 54.74, 54.93, 55.14, 54.65, 54.61, 54.32, 53.73, 53.43, 53.57, 53.61, 53.61, 53.89, 54.66, 55.43, 55.97, 56.07, 55.92, 58.11, 59.25, 60.4, 60.63, 61.08, 61.15, 60.92, 60.63, 61.41, 61.66, 61.92, 61.83, 59.89, 60.16, 60.39, 61.68, 62.27, 62.43, 62.99, 61.39, 61.69, 61.35, 62.1, 63.02, 63.49, 64.01, 64.05, 64.88, 65.47, 64.35, 64.32, 64.27, 62.74, 61.62, 61.12, 60.16, 60.42, 59.23, 58.14, 56.95, 55.7, 55.47, 54.09, 53.22, 52.53, 51.12]};
 const confDist = {"labels": ["<40%", "40-50%", "50-60%", "60-70%", "70-80%", ">80%"], "values": [1, 4, 3, 22, 0, 0], "tickers": [["PLX"], ["BVH", "FPT", "GAS", "VRE"], ["MSN", "MWG", "VHM"], ["ACB", "SSB", "BCM", "BID", "CTG", "HDB", "HPG", "MBB", "POW", "SAB", "SHB", "SSI", "STB", "TCB", "TPB", "VCB", "VIB", "VIC", "VJC", "VNM", "GVR", "VPB"], [], []]};
 const tickerArticles = {"ACB": [], "BCM": [], "BID": [], "BVH": [], "CTG": [], "FPT": [{"title": "Theo dấu dòng tiền cá mập 17/04: Khối ngoại và tự doanh mua ròng nhẹ", "link": "http://vietstock.vn/2026/04/theo-dau-dong-tien-ca-map-1704-khoi-ngoai-va-tu-doanh-mua-rong-nhe-830-1429613.htm", "published": "17/04 12:40", "sentiment": 1.0, "source": "domestic"}, {"title": "Theo dấu dòng tiền cá mập 16/04: Khối ngoại bán ròng hơn 1 ngàn tỷ đồng, tự doanh mua mạnh SHB", "link": "http://vietstock.vn/2026/04/theo-dau-dong-tien-ca-map-1604-khoi-ngoai-ban-rong-hon-1-ngan-ty-dong-tu-doanh-mua-manh-shb-830-1428914.htm", "published": "16/04 13:49", "sentiment": -0.2, "source": "domestic"}, {"title": "Long Châu tiên phong ứng dụng dữ liệu dân cư, định danh và xác thực điện tử để ra mắt nhiều dịch vụ chăm sóc sức khỏe độ", "link": "http://vietstock.vn/2026/04/long-chau-tien-phong-ung-dung-du-lieu-dan-cu-dinh-danh-va-xac-thuc-dien-tu-de-ra-mat-nhieu-dich-vu-cham-soc-suc-khoe-dot-pha-sat-dan-gan-dan-trong-2026-737-1429510.htm", "published": "17/04 11:35", "sentiment": 0.0, "source": "domestic"}, {"title": "ĐHCĐ FPT Retail: Long Châu sẽ mang hơn 30 loại thuốc, giải pháp tiên tiến thế giới điều trị bệnh hiếm, bệnh mạn tính về ", "link": "https://cafef.vn/dhcd-fpt-retail-long-chau-se-mang-hon-30-loai-thuoc-giai-phap-tien-tien-the-gioi-dieu-tri-benh-hiem-benh-man-tinh-ve-viet-nam-trong-nam-2026-188260417160421666.chn", "published": "17/04 09:04", "sentiment": 1.0, "source": "domestic"}, {"title": "FPT ảnh hưởng thế nào khi thay đổi cổ đông nắm 50,17% cổ phần FPT Telecom?", "link": "https://cafef.vn/fpt-anh-huong-the-nao-khi-bo-cong-an-nam-5017-co-phan-fpt-telecom-188260416230940729.chn", "published": "16/04 17:08", "sentiment": 0.0, "source": "domestic"}], "GAS": [{"title": "Ấn Độ: Lao động bỏ về quê vì giá gas cao, các nhà máy điêu đứng", "link": "https://vneconomy.vn/an-do-lao-dong-bo-ve-que-vi-gia-gas-cao-cac-nha-may-dieu-dung.htm", "published": "17/04 01:00", "sentiment": 0.0, "source": "intl"}], "GVR": [], "HDB": [], "HPG": [{"title": "Mảng thức ăn chăn nuôi của Hòa Phát tăng trưởng mạnh trong quý 1", "link": "http://vietstock.vn/2026/04/mang-thuc-an-chan-nuoi-cua-hoa-phat-tang-truong-manh-trong-quy-1-737-1429739.htm", "published": "18/04 05:26", "sentiment": 0.0, "source": "domestic"}], "MBB": [{"title": "ĐHĐCĐ MB: Lãi trước thuế quý 1 đạt 9,500 tỷ đồng, tăng hơn 13%", "link": "http://vietstock.vn/2026/04/dhdcd-mb-lai-truoc-thue-quy-1-dat-9500-ty-dong-tang-hon-13-737-1428389.htm", "published": "18/04 05:21", "sentiment": 0.0, "source": "domestic"}], "MSN": [], "MWG": [{"title": "Theo dấu dòng tiền cá mập 17/04: Khối ngoại và tự doanh mua ròng nhẹ", "link": "http://vietstock.vn/2026/04/theo-dau-dong-tien-ca-map-1704-khoi-ngoai-va-tu-doanh-mua-rong-nhe-830-1429613.htm", "published": "17/04 12:40", "sentiment": 1.0, "source": "domestic"}, {"title": "CEO Vũ Đăng Linh: MWG không thay đổi kế hoạch, đã lãi 2.7 ngàn tỷ trong quý 1", "link": "http://vietstock.vn/2026/04/ceo-vu-dang-linhmwg-khong-thay-doi-ke-hoach-da-lai-27-ngan-ty-trong-quy-1-737-1429724.htm", "published": "18/04 09:17", "sentiment": 0.0, "source": "domestic"}, {"title": "Ông Nguyễn Đức Tài: 'Kinh doanh khó không phải lý do để hạ chỉ tiêu'", "link": "https://vnexpress.net/ong-nguyen-duc-tai-kinh-doanh-kho-khong-phai-ly-do-de-ha-chi-tieu-5064069.html", "published": "18/04 09:30", "sentiment": 1.0, "source": "domestic"}], "PLX": [], "POW": [], "SAB": [], "SHB": [{"title": "Theo dấu dòng tiền cá mập 16/04: Khối ngoại bán ròng hơn 1 ngàn tỷ đồng, tự doanh mua mạnh SHB", "link": "http://vietstock.vn/2026/04/theo-dau-dong-tien-ca-map-1604-khoi-ngoai-ban-rong-hon-1-ngan-ty-dong-tu-doanh-mua-manh-shb-830-1428914.htm", "published": "16/04 13:49", "sentiment": -0.2, "source": "domestic"}, {"title": "Phó Chủ tịch HĐQT kiêm PTGĐ Đỗ Quang Vinh: SHB muốn trở thành ngân hàng tầm vóc quốc gia thế hệ mới", "link": "https://cafef.vn/pho-chu-tich-hdqt-kiem-ptgd-do-quang-vinh-shb-muon-tro-thanh-ngan-hang-tam-voc-quoc-gia-the-he-moi-188260417100134821.chn", "published": "17/04 03:00", "sentiment": 1.0, "source": "domestic"}], "SSB": [], "SSI": [], "STB": [{"title": "Theo dấu dòng tiền cá mập 17/04: Khối ngoại và tự doanh mua ròng nhẹ", "link": "http://vietstock.vn/2026/04/theo-dau-dong-tien-ca-map-1704-khoi-ngoai-va-tu-doanh-mua-rong-nhe-830-1429613.htm", "published": "17/04 12:40", "sentiment": 1.0, "source": "domestic"}], "TCB": [], "TPB": [], "VCB": [], "VHM": [{"title": "Theo dấu dòng tiền cá mập 16/04: Khối ngoại bán ròng hơn 1 ngàn tỷ đồng, tự doanh mua mạnh SHB", "link": "http://vietstock.vn/2026/04/theo-dau-dong-tien-ca-map-1604-khoi-ngoai-ban-rong-hon-1-ngan-ty-dong-tu-doanh-mua-manh-shb-830-1428914.htm", "published": "16/04 13:49", "sentiment": -0.2, "source": "domestic"}], "VIB": [], "VIC": [{"title": "VIC đưa VN-Index trở lại hít thở bầu không khí 1,800", "link": "http://vietstock.vn/2026/04/vic-dua-vn-index-tro-lai-hit-tho-bau-khong-khi-1800-830-1429736.htm", "published": "18/04 13:30", "sentiment": 0.0, "source": "domestic"}, {"title": "Theo dấu dòng tiền cá mập 17/04: Khối ngoại và tự doanh mua ròng nhẹ", "link": "http://vietstock.vn/2026/04/theo-dau-dong-tien-ca-map-1704-khoi-ngoai-va-tu-doanh-mua-rong-nhe-830-1429613.htm", "published": "17/04 12:40", "sentiment": 1.0, "source": "domestic"}, {"title": "Theo dấu dòng tiền cá mập 16/04: Khối ngoại bán ròng hơn 1 ngàn tỷ đồng, tự doanh mua mạnh SHB", "link": "http://vietstock.vn/2026/04/theo-dau-dong-tien-ca-map-1604-khoi-ngoai-ban-rong-hon-1-ngan-ty-dong-tu-doanh-mua-manh-shb-830-1428914.htm", "published": "16/04 13:49", "sentiment": -0.2, "source": "domestic"}], "VJC": [], "VNM": [], "VPB": [], "VRE": [], "_geo_risk": {"level": 3, "summary": "conflict (20), general (4), sanctions (1)", "headlines": [{"title": "Chủ tịch TVB dự báo thị trường tiếp tục biến động, hé lộ danh mục tự doanh cho năm mới", "link": "http://vietstock.vn/2026/04/chu-tich-tvb-du-bao-thi-truong-tiep-tuc-bien-dong-he-lo-danh-muc-tu-doanh-cho-nam-moi-737-1429761.htm", "published": "18/04 11:15", "source": "kinh_doanh"}, {"title": "CEO Vũ Đăng Linh: MWG không thay đổi kế hoạch, đã lãi 2.7 ngàn tỷ trong quý 1", "link": "http://vietstock.vn/2026/04/ceo-vu-dang-linhmwg-khong-thay-doi-ke-hoach-da-lai-27-ngan-ty-trong-quy-1-737-1429724.htm", "published": "18/04 09:17", "source": "kinh_doanh"}, {"title": "Bộ Khoa học và Công nghệ khẳng định Viettel đã làm chủ công nghệ tên lửa hành trình", "link": "https://cafef.vn/bo-khoa-hoc-va-cong-nghe-khang-dinh-viettel-da-lam-chu-cong-nghe-ten-lua-hanh-trinh-188260418093641422.chn", "published": "18/04 02:36", "source": "cafef_doanh_nghiep"}, {"title": "Chiến sự Trung Đông hé lộ sức ép kinh tế của ông Trump", "link": "https://vnexpress.net/chien-su-trung-dong-he-lo-suc-ep-kinh-te-cua-ong-trump-5064052.html", "published": "18/04 23:30", "source": "vnexpress_kd"}, {"title": "Xung đột Trung Đông thúc đẩy các nước đầu tư điện hạt nhân", "link": "https://vnexpress.net/xung-dot-trung-dong-thuc-day-cac-nuoc-dau-tu-dien-hat-nhan-5064135.html", "published": "18/04 17:05", "source": "vnexpress_kd"}, {"title": "Thế giới mất hơn 50 tỷ USD dầu thô vì xung đột Trung Đông", "link": "https://vnexpress.net/the-gioi-mat-hon-50-ty-usd-dau-tho-vi-xung-dot-trung-dong-5064020.html", "published": "18/04 06:19", "source": "vnexpress_kd"}, {"title": "UOB hạ dự báo tăng trưởng Việt Nam do xung đột Trung Đông", "link": "https://vnexpress.net/uob-ha-du-bao-tang-truong-viet-nam-do-xung-dot-trung-dong-5063836.html", "published": "17/04 12:26", "source": "vnexpress_kd"}, {"title": "Triều Tiên phóng loạt tên lửa đạn đạo ra biển", "link": "https://vnexpress.net/trieu-tien-phong-loat-ten-lua-dan-dao-ra-bien-5064210.html", "published": "19/04 00:42", "source": "vnexpress_tg"}]}};
 
 // Chart defaults
 Chart.defaults.color = '#94a3b8';
-Chart.defaults.borderColor = '#1e3a5f';
-Chart.defaults.font = { family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", size: 11 };
+Chart.defaults.borderColor = '#1e293b';
+Chart.defaults.font = { family: "'Fira Sans', -apple-system, BlinkMacSystemFont, sans-serif", size: 11 };
 
 // Cumulative P&L
 new Chart(document.getElementById('cumChart'), {
@@ -555,8 +593,8 @@ new Chart(document.getElementById('cumChart'), {
     labels: cumulative.labels,
     datasets: [{
       data: cumulative.values,
-      borderColor: '#3b82f6',
-      backgroundColor: 'rgba(59,130,246,0.08)',
+      borderColor: '#22C55E',
+      backgroundColor: 'rgba(34,197,94,0.07)',
       fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2,
     }]
   },
@@ -564,8 +602,8 @@ new Chart(document.getElementById('cumChart'), {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y.toFixed(1) + ' triệu VND' } } },
     scales: {
-      x: { ticks: { maxTicksLimit: 6 }, grid: { color: '#1e293b' } },
-      y: { ticks: { callback: v => v + 'M' }, grid: { color: '#1e293b' } }
+      x: { ticks: { maxTicksLimit: 6 }, grid: { color: '#0f172a' } },
+      y: { ticks: { callback: v => v + 'M' }, grid: { color: '#0f172a' } }
     }
   }
 });
@@ -585,8 +623,8 @@ new Chart(document.getElementById('monthChart'), {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y.toFixed(1) + ' triệu VND' } } },
     scales: {
-      x: { ticks: { maxTicksLimit: 8 }, grid: { color: '#1e293b' } },
-      y: { ticks: { callback: v => v + 'M' }, grid: { color: '#1e293b' } }
+      x: { ticks: { maxTicksLimit: 8 }, grid: { color: '#0f172a' } },
+      y: { ticks: { callback: v => v + 'M' }, grid: { color: '#0f172a' } }
     }
   }
 });
@@ -599,7 +637,7 @@ new Chart(document.getElementById('confChart'), {
     datasets: [{
       label: 'Số mã',
       data: confDist.values,
-      backgroundColor: ['#334155','#334155','#334155','#3b82f6','#10b981','#10b981'],
+      backgroundColor: ['#1e293b','#1e293b','#1e293b','#60a5fa','#22C55E','#22C55E'],
       borderRadius: 4,
     }]
   },
