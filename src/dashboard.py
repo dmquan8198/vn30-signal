@@ -24,6 +24,47 @@ def load_latest_signals() -> pd.DataFrame:
     return pd.read_csv(files[-1])
 
 
+def load_confidence_history(lookback: int = 14) -> dict:
+    """Load confidence for each ticker across last N signal files.
+
+    Returns:
+        {ticker: {"values": [oldest…newest], "dates": [...], "std": float,
+                  "delta": float|None, "trend": str}}
+    """
+    files = sorted(SIGNALS_DIR.glob("*.csv"))[-lookback:]
+    raw: dict[str, list[tuple]] = {}  # ticker -> [(date, conf), ...]
+    for f in files:
+        try:
+            df = pd.read_csv(f, usecols=lambda c: c in ("ticker", "date", "confidence"))
+            for _, row in df.iterrows():
+                t = str(row["ticker"])
+                raw.setdefault(t, []).append((str(row.get("date", "")), float(row["confidence"])))
+        except Exception:
+            pass
+
+    result = {}
+    for ticker, entries in raw.items():
+        vals = [v for _, v in entries]
+        dates = [d for d, _ in entries]
+        std = float(np.std(vals)) if len(vals) >= 2 else 0.0
+        delta = (vals[-1] - vals[-2]) if len(vals) >= 2 else None
+        # Trend over last 3 points
+        if len(vals) >= 3:
+            slope = vals[-1] - vals[-3]
+            trend = "↑" if slope > 0.02 else "↓" if slope < -0.02 else "→"
+        elif len(vals) >= 2:
+            d = vals[-1] - vals[-2]
+            trend = "↑" if d > 0.01 else "↓" if d < -0.01 else "→"
+        else:
+            trend = "—"
+        result[ticker] = {
+            "values": vals, "dates": dates,
+            "std": std, "delta": delta, "trend": trend,
+            "n": len(vals),
+        }
+    return result
+
+
 def load_backtest() -> pd.DataFrame:
     path = BACKTEST_DIR / "trades.csv"
     if not path.exists():
@@ -262,7 +303,7 @@ def build_portfolio_section(signals: pd.DataFrame) -> str:
     </div>"""
 
 
-def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFrame, articles: dict, tracker_report: dict = None) -> str:
+def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFrame, articles: dict, tracker_report: dict = None, conf_history: dict = None) -> str:
     date_str = signals["date"].iloc[0] if not signals.empty else datetime.today().strftime("%Y-%m-%d")
     generated_at = datetime.now().strftime("%d/%m/%Y %H:%M")
     market_bull = int(signals["vni_bull"].iloc[0]) if not signals.empty and "vni_bull" in signals.columns else 0
@@ -308,6 +349,62 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
         sent_icon = "😐"
         sent_text = "Trung lập"
 
+    _conf_hist = conf_history or {}
+
+    def _stability_cell(ticker: str) -> str:
+        """Render confidence stability: delta vs yesterday + volatility badge."""
+        h = _conf_hist.get(ticker)
+        if not h or h["n"] < 2:
+            return '<td class="num" style="color:#475569;font-size:11px">—</td>'
+
+        delta = h["delta"]        # float, change from yesterday
+        std   = h["std"]          # standard deviation across history
+        trend = h["trend"]        # ↑ → ↓
+        n     = h["n"]
+
+        # Delta badge
+        if delta is not None:
+            d_pct = delta * 100
+            d_color = "#22C55E" if d_pct > 0.5 else "#ef4444" if d_pct < -0.5 else "#94a3b8"
+            d_str = f"{d_pct:+.1f}%"
+        else:
+            d_color, d_str = "#475569", "—"
+
+        # Stability label based on std
+        if std < 0.025:
+            stab_color = "#22C55E"
+            stab_icon  = "●"
+            stab_tip   = f"Ổn định (biến động {std*100:.1f}% qua {n} ngày)"
+        elif std < 0.055:
+            stab_color = "#f59e0b"
+            stab_icon  = "●"
+            stab_tip   = f"Dao động vừa (±{std*100:.1f}% qua {n} ngày)"
+        else:
+            stab_color = "#ef4444"
+            stab_icon  = "●"
+            stab_tip   = f"Không ổn định (±{std*100:.1f}% qua {n} ngày) — cần thận trọng"
+
+        # Mini sparkline as tiny inline bars
+        vals = h["values"]
+        if len(vals) >= 2:
+            vmin, vmax = min(vals), max(vals)
+            bar_html = ""
+            for v in vals[-5:]:  # show last 5 days max
+                pct = ((v - vmin) / (vmax - vmin) * 100) if vmax > vmin else 50
+                bar_html += f'<div style="width:4px;height:{max(4, pct*0.18+4):.0f}px;background:{stab_color};border-radius:1px;opacity:0.7"></div>'
+            spark = f'<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px">{bar_html}</div>'
+        else:
+            spark = ""
+
+        tooltip_text = f"Hôm nay vs hôm qua: {d_str} | {stab_tip} | Xu hướng: {trend}"
+        return (
+            f'<td class="num" title="{tooltip_text}" style="cursor:help;white-space:nowrap">'
+            f'<span style="color:{d_color};font-weight:600;font-family:var(--font-mono)">{d_str}</span>'
+            f'&nbsp;<span style="color:{stab_color};font-size:9px" title="{stab_tip}">{stab_icon}</span>'
+            f'&nbsp;{spark}'
+            f'</td>'
+        )
+
     def signal_rows(df):
         rows = ""
         for _, r in df.iterrows():
@@ -334,7 +431,7 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
                 sig_badge = '<span class="badge badge-hold">CHỜ</span>'
 
             conf_pct = conf * 100
-            conf_color = "#10b981" if conf >= 0.6 else "#f59e0b"
+            conf_color = "#22C55E" if conf >= 0.6 else "#f59e0b"
             conf_bar = (
                 f'<div class="conf-bar">'
                 f'<div class="conf-track"><div class="conf-fill" style="width:{conf_pct:.0f}%;background:{conf_color}"></div></div>'
@@ -353,7 +450,7 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
                 rsi_label = f'<span style="color:#94a3b8">{rsi:.0f}</span>'
 
             ret5 = r.get("ret_5d", 0)
-            ret_color = "#10b981" if ret5 > 0 else "#ef4444"
+            ret_color = "#22C55E" if ret5 > 0 else "#ef4444"
 
             # Ticker cell — links to Vietstock detail page
             ticker_cell = f'<a class="ticker-link" href="https://finance.vietstock.vn/{ticker}/thong-tin-co-ban.htm" target="_blank" rel="noopener">{ticker}</a>'
@@ -364,6 +461,7 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
                 <td>{sig_badge} {news_badges}</td>
                 <td class="num">{r['close']:,g}đ</td>
                 <td>{conf_bar}</td>
+                {_stability_cell(ticker)}
                 <td class="num">{rsi_label}</td>
                 <td class="num" style="color:{ret_color};font-weight:600">{ret5:+.1f}%</td>
             </tr>"""
@@ -672,6 +770,10 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
               <span class="tip" data-tip="AI tự tin bao nhiêu % về khuyến nghị này. ≥60% (xanh) là đáng tin cậy. Dưới 60% (vàng) nên theo dõi thêm.">?</span>
             </th>
             <th class="num">
+              Hôm nay vs hôm qua
+              <span class="tip" data-tip="Độ chắc chắn thay đổi so với hôm qua (+/-%). Chấm màu: 🟢 ổn định (dao động &lt;2.5%), 🟡 vừa (&lt;5.5%), 🔴 bất ổn (&gt;5.5%). Thanh mini = lịch sử 5 ngày. Hover để xem chi tiết.">?</span>
+            </th>
+            <th class="num">
               Sức mạnh giá
               <span class="tip" data-tip="Chỉ số RSI (0-100): dưới 30 💚 = giá đang rẻ, có thể phục hồi. Trên 70 🔥 = giá đang cao, cẩn thận mua đỉnh. 30-70 = bình thường.">?</span>
             </th>
@@ -709,7 +811,7 @@ def generate_html(signals: pd.DataFrame, trades: pd.DataFrame, news: pd.DataFram
         <div style="font-size:12px;color:#94a3b8;line-height:1.8">
           <div style="margin-bottom:8px">📌 <strong style="color:#cbd5e1">Ai nên dùng dashboard này?</strong><br>Nhà đầu tư mới muốn có gợi ý ban đầu khi chọn cổ phiếu trong rổ VN30.</div>
           <div style="margin-bottom:8px">⚠️ <strong style="color:#cbd5e1">Lưu ý quan trọng</strong><br>AI chỉ là công cụ hỗ trợ. Không có mô hình nào đúng 100%. Luôn quản lý rủi ro và chỉ đầu tư số tiền bạn sẵn sàng mất.</div>
-          <div>🕓 <strong style="color:#cbd5e1">Cập nhật lúc nào?</strong><br>Dashboard tự động chạy sau 15:05 mỗi ngày giao dịch, sau khi thị trường đóng cửa.</div>
+          <div>🕓 <strong style="color:#cbd5e1">Cập nhật lúc nào?</strong><br>Dashboard được cập nhật thủ công sau khi thị trường đóng cửa (14:45 HN). Lần cập nhật gần nhất: <strong style="color:#cbd5e1">{generated_at}</strong>.</div>
         </div>
       </div>
     </div>
@@ -916,6 +1018,7 @@ def build_dashboard() -> Path:
     news = load_latest_news()
     articles = load_latest_articles()
     tracker_report = load_tracker_report()
+    conf_history = load_confidence_history()
 
     print(f"  Signals: {len(signals)} rows")
     print(f"  Trades:  {len(trades)} rows")
@@ -923,8 +1026,9 @@ def build_dashboard() -> Path:
     print(f"  Articles: {sum(len(v) for v in articles.values())} total")
     has_score = bool(tracker_report.get("prediction_score", {}).get("score"))
     print(f"  Tracker: {'score=' + str(tracker_report['prediction_score']['score']) if has_score else 'no data yet'}")
+    print(f"  Conf history: {len(conf_history)} tickers, up to {max((v['n'] for v in conf_history.values()), default=0)} days")
 
-    html = generate_html(signals, trades, news, articles, tracker_report)
+    html = generate_html(signals, trades, news, articles, tracker_report, conf_history)
     path = DASHBOARD_DIR / "index.html"
     path.write_text(html, encoding="utf-8")
     print(f"\n✅ Dashboard → {path}")

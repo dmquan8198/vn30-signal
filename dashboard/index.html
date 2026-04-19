@@ -177,7 +177,7 @@
 <div class="header">
   <div>
     <h1>VN30 <span>Signal</span> Dashboard</h1>
-    <div class="meta">Tín hiệu ngày 2026-04-17 · Tạo lúc 19/04/2026 11:09 · Mô hình AI phân tích 60 chỉ số kỹ thuật</div>
+    <div class="meta">Tín hiệu ngày 2026-04-17 · Tạo lúc 19/04/2026 11:17 · Mô hình AI phân tích 60 chỉ số kỹ thuật</div>
   </div>
   <div style="text-align:right;display:flex;align-items:center;gap:10px">
     <span class="regime-badge" style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3)">Thị trường đang giảm 🔴</span>
@@ -313,6 +313,10 @@
               <span class="tip" data-tip="AI tự tin bao nhiêu % về khuyến nghị này. ≥60% (xanh) là đáng tin cậy. Dưới 60% (vàng) nên theo dõi thêm.">?</span>
             </th>
             <th class="num">
+              Hôm nay vs hôm qua
+              <span class="tip" data-tip="Độ chắc chắn thay đổi so với hôm qua (+/-%). Chấm màu: 🟢 ổn định (dao động &lt;2.5%), 🟡 vừa (&lt;5.5%), 🔴 bất ổn (&gt;5.5%). Thanh mini = lịch sử 5 ngày. Hover để xem chi tiết.">?</span>
+            </th>
+            <th class="num">
               Sức mạnh giá
               <span class="tip" data-tip="Chỉ số RSI (0-100): dưới 30 💚 = giá đang rẻ, có thể phục hồi. Trên 70 🔥 = giá đang cao, cẩn thận mua đỉnh. 30-70 = bình thường.">?</span>
             </th>
@@ -328,7 +332,8 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/ACB/thong-tin-co-ban.htm" target="_blank" rel="noopener">ACB</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="ACB">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">23,750đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:64%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">64%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:64%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">64%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: -3.7% | Không ổn định (±5.6% qua 3 ngày) — cần thận trọng | Xu hướng: ↓" style="cursor:help;white-space:nowrap"><span style="color:#ef4444;font-weight:600;font-family:var(--font-mono)">-3.7%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±5.6% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:9px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">52</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-0.4%</td>
             </tr>
@@ -336,7 +341,8 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/SSB/thong-tin-co-ban.htm" target="_blank" rel="noopener">SSB</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="SSB">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">16,850đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:64%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">64%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:64%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">64%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: -4.0% | Không ổn định (±5.6% qua 3 ngày) — cần thận trọng | Xu hướng: ↓" style="cursor:help;white-space:nowrap"><span style="color:#ef4444;font-weight:600;font-family:var(--font-mono)">-4.0%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±5.6% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:9px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">48</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-1.8%</td>
             </tr>
@@ -344,15 +350,17 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/BCM/thong-tin-co-ban.htm" target="_blank" rel="noopener">BCM</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="BCM">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">55,700đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +16.0% | Không ổn định (±6.7% qua 3 ngày) — cần thận trọng | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+16.0%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±6.7% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:9px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">52</span></td>
-                <td class="num" style="color:#10b981;font-weight:600">+0.4%</td>
+                <td class="num" style="color:#22C55E;font-weight:600">+0.4%</td>
             </tr>
             <tr class="row-hold" data-ticker="BID">
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/BID/thong-tin-co-ban.htm" target="_blank" rel="noopener">BID</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="BID">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">40,300đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +16.4% | Không ổn định (±7.5% qua 3 ngày) — cần thận trọng | Xu hướng: →" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+16.4%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±7.5% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:21px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">46</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-1.2%</td>
             </tr>
@@ -360,7 +368,8 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/CTG/thong-tin-co-ban.htm" target="_blank" rel="noopener">CTG</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="CTG">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">34,850đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +9.7% | Dao động vừa (±5.3% qua 3 ngày) | Xu hướng: ↓" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+9.7%</span>&nbsp;<span style="color:#f59e0b;font-size:9px" title="Dao động vừa (±5.3% qua 3 ngày)">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:22px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:18px;background:#f59e0b;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">50</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-0.4%</td>
             </tr>
@@ -368,15 +377,17 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/HDB/thong-tin-co-ban.htm" target="_blank" rel="noopener">HDB</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="HDB">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">26,200đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +12.7% | Không ổn định (±5.9% qua 3 ngày) — cần thận trọng | Xu hướng: →" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+12.7%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±5.9% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">54</span></td>
-                <td class="num" style="color:#10b981;font-weight:600">+0.2%</td>
+                <td class="num" style="color:#22C55E;font-weight:600">+0.2%</td>
             </tr>
             <tr class="row-hold" data-ticker="HPG">
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/HPG/thong-tin-co-ban.htm" target="_blank" rel="noopener">HPG</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="HPG">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">28,000đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +9.0% | Dao động vừa (±4.3% qua 3 ngày) | Xu hướng: →" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+9.0%</span>&nbsp;<span style="color:#f59e0b;font-size:9px" title="Dao động vừa (±4.3% qua 3 ngày)">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:22px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#f59e0b;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">56</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">+0.0%</td>
             </tr>
@@ -384,7 +395,8 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/MBB/thong-tin-co-ban.htm" target="_blank" rel="noopener">MBB</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="MBB">🌍 geo:conflict (20), general (4), sanctions (1</span> <span class="news-badge news-badge-link" data-ticker="MBB">🔒 kín room ngoại</span> </td>
                 <td class="num">26,450đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +8.4% | Không ổn định (±6.7% qua 3 ngày) — cần thận trọng | Xu hướng: ↓" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+8.4%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±6.7% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:13px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">51</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-0.9%</td>
             </tr>
@@ -392,15 +404,17 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/POW/thong-tin-co-ban.htm" target="_blank" rel="noopener">POW</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="POW">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">13,250đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +14.7% | Không ổn định (±6.0% qua 3 ngày) — cần thận trọng | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+14.7%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±6.0% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:12px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">52</span></td>
-                <td class="num" style="color:#10b981;font-weight:600">+1.9%</td>
+                <td class="num" style="color:#22C55E;font-weight:600">+1.9%</td>
             </tr>
             <tr class="row-hold" data-ticker="SAB">
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/SAB/thong-tin-co-ban.htm" target="_blank" rel="noopener">SAB</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="SAB">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">45,500đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +10.5% | Dao động vừa (±5.3% qua 3 ngày) | Xu hướng: →" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+10.5%</span>&nbsp;<span style="color:#f59e0b;font-size:9px" title="Dao động vừa (±5.3% qua 3 ngày)">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:22px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:20px;background:#f59e0b;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">52</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-0.7%</td>
             </tr>
@@ -408,7 +422,8 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/SHB/thong-tin-co-ban.htm" target="_blank" rel="noopener">SHB</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="SHB">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">15,300đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +17.4% | Không ổn định (±7.1% qua 3 ngày) — cần thận trọng | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+17.4%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±7.1% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:15px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">53</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-0.7%</td>
             </tr>
@@ -416,7 +431,8 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/SSI/thong-tin-co-ban.htm" target="_blank" rel="noopener">SSI</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="SSI">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">28,550đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +17.9% | Không ổn định (±7.3% qua 3 ngày) — cần thận trọng | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+17.9%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±7.3% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:14px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">51</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-0.2%</td>
             </tr>
@@ -424,7 +440,8 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/STB/thong-tin-co-ban.htm" target="_blank" rel="noopener">STB</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="STB">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">64,000đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +13.6% | Không ổn định (±5.6% qua 3 ngày) — cần thận trọng | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+13.6%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±5.6% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:12px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">51</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-4.3%</td>
             </tr>
@@ -432,7 +449,8 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/TCB/thong-tin-co-ban.htm" target="_blank" rel="noopener">TCB</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="TCB">🌍 geo:conflict (20), general (4), sanctions (1</span> <span class="news-badge news-badge-link" data-ticker="TCB">🔒 kín room ngoại</span> </td>
                 <td class="num">32,250đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +16.8% | Không ổn định (±6.9% qua 3 ngày) — cần thận trọng | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+16.8%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±6.9% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:15px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">57</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">+0.0%</td>
             </tr>
@@ -440,7 +458,8 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/TPB/thong-tin-co-ban.htm" target="_blank" rel="noopener">TPB</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="TPB">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">16,250đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +9.1% | Dao động vừa (±4.9% qua 3 ngày) | Xu hướng: ↓" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+9.1%</span>&nbsp;<span style="color:#f59e0b;font-size:9px" title="Dao động vừa (±4.9% qua 3 ngày)">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:22px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:18px;background:#f59e0b;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">49</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-0.3%</td>
             </tr>
@@ -448,7 +467,8 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/VCB/thong-tin-co-ban.htm" target="_blank" rel="noopener">VCB</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="VCB">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">59,500đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +6.7% | Dao động vừa (±3.7% qua 3 ngày) | Xu hướng: →" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+6.7%</span>&nbsp;<span style="color:#f59e0b;font-size:9px" title="Dao động vừa (±3.7% qua 3 ngày)">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:22px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:18px;background:#f59e0b;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">49</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-0.5%</td>
             </tr>
@@ -456,7 +476,8 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/VIB/thong-tin-co-ban.htm" target="_blank" rel="noopener">VIB</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="VIB">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">17,350đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +16.1% | Không ổn định (±7.7% qua 3 ngày) — cần thận trọng | Xu hướng: →" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+16.1%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±7.7% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:21px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">54</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-0.6%</td>
             </tr>
@@ -464,23 +485,26 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/VIC/thong-tin-co-ban.htm" target="_blank" rel="noopener">VIC</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="VIC">🌍 geo:conflict (20), general (4), sanctions (1</span> <span class="news-badge news-badge-link" data-ticker="VIC">🌊 ngoại mua mạnh</span> </td>
                 <td class="num">187,900đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: -13.1% | Không ổn định (±5.9% qua 3 ngày) — cần thận trọng | Xu hướng: ↓" style="cursor:help;white-space:nowrap"><span style="color:#ef4444;font-weight:600;font-family:var(--font-mono)">-13.1%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±5.9% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:20px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span title="Quá mua — giá có thể sắp điều chỉnh" style="color:#ef4444;cursor:help">76 🔥</span></td>
-                <td class="num" style="color:#10b981;font-weight:600">+23.9%</td>
+                <td class="num" style="color:#22C55E;font-weight:600">+23.9%</td>
             </tr>
             <tr class="row-hold" data-ticker="VJC">
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/VJC/thong-tin-co-ban.htm" target="_blank" rel="noopener">VJC</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="VJC">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">177,800đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: -3.2% | Ổn định (biến động 2.2% qua 3 ngày) | Xu hướng: ↓" style="cursor:help;white-space:nowrap"><span style="color:#ef4444;font-weight:600;font-family:var(--font-mono)">-3.2%</span>&nbsp;<span style="color:#22C55E;font-size:9px" title="Ổn định (biến động 2.2% qua 3 ngày)">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:22px;background:#22C55E;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:15px;background:#22C55E;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#22C55E;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">66</span></td>
-                <td class="num" style="color:#10b981;font-weight:600">+6.5%</td>
+                <td class="num" style="color:#22C55E;font-weight:600">+6.5%</td>
             </tr>
             <tr class="row-hold" data-ticker="VNM">
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/VNM/thong-tin-co-ban.htm" target="_blank" rel="noopener">VNM</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="VNM">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">61,300đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">62%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:62%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">62%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +14.8% | Không ổn định (±6.2% qua 3 ngày) — cần thận trọng | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+14.8%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±6.2% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:16px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">46</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-2.4%</td>
             </tr>
@@ -488,7 +512,8 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/GVR/thong-tin-co-ban.htm" target="_blank" rel="noopener">GVR</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="GVR">🌍 geo:conflict (20), general (4), sanctions (1</span> <span class="news-badge news-badge-link" data-ticker="GVR">🌊 ngoại mua mạnh</span> </td>
                 <td class="num">33,500đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:60%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">60%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:60%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">60%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: -4.3% | Không ổn định (±9.1% qua 3 ngày) — cần thận trọng | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#ef4444;font-weight:600;font-family:var(--font-mono)">-4.3%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±9.1% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:18px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">51</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-0.5%</td>
             </tr>
@@ -496,39 +521,44 @@
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/VPB/thong-tin-co-ban.htm" target="_blank" rel="noopener">VPB</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="VPB">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">28,250đ</td>
-                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:60%;background:#10b981"></div></div><span style="color:#10b981;font-weight:600">60%</span></div></td>
+                <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:60%;background:#22C55E"></div></div><span style="color:#22C55E;font-weight:600">60%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +15.5% | Không ổn định (±6.4% qua 3 ngày) — cần thận trọng | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+15.5%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±6.4% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:11px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">62</span></td>
-                <td class="num" style="color:#10b981;font-weight:600">+3.5%</td>
+                <td class="num" style="color:#22C55E;font-weight:600">+3.5%</td>
             </tr>
             <tr class="row-hold" data-ticker="MSN">
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/MSN/thong-tin-co-ban.htm" target="_blank" rel="noopener">MSN</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="MSN">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">79,500đ</td>
                 <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:59%;background:#f59e0b"></div></div><span style="color:#f59e0b;font-weight:600">59%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +16.2% | Không ổn định (±6.7% qua 3 ngày) — cần thận trọng | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+16.2%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±6.7% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:11px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">63</span></td>
-                <td class="num" style="color:#10b981;font-weight:600">+1.9%</td>
+                <td class="num" style="color:#22C55E;font-weight:600">+1.9%</td>
             </tr>
             <tr class="row-hold" data-ticker="MWG">
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/MWG/thong-tin-co-ban.htm" target="_blank" rel="noopener">MWG</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="MWG">👀 watch: tin tốt</span> <span class="news-badge news-badge-link" data-ticker="MWG">🌊 ngoại mua mạnh</span> </td>
                 <td class="num">86,900đ</td>
                 <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:59%;background:#f59e0b"></div></div><span style="color:#f59e0b;font-weight:600">59%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +5.8% | Không ổn định (±5.9% qua 3 ngày) — cần thận trọng | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+5.8%</span>&nbsp;<span style="color:#ef4444;font-size:9px" title="Không ổn định (±5.9% qua 3 ngày) — cần thận trọng">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:4px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:15px;background:#ef4444;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#ef4444;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">60</span></td>
-                <td class="num" style="color:#10b981;font-weight:600">+6.6%</td>
+                <td class="num" style="color:#22C55E;font-weight:600">+6.6%</td>
             </tr>
             <tr class="row-hold" data-ticker="VHM">
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/VHM/thong-tin-co-ban.htm" target="_blank" rel="noopener">VHM</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="VHM">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">135,700đ</td>
                 <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:59%;background:#f59e0b"></div></div><span style="color:#f59e0b;font-weight:600">59%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: -12.5% | Dao động vừa (±5.1% qua 3 ngày) | Xu hướng: ↓" style="cursor:help;white-space:nowrap"><span style="color:#ef4444;font-weight:600;font-family:var(--font-mono)">-12.5%</span>&nbsp;<span style="color:#f59e0b;font-size:9px" title="Dao động vừa (±5.1% qua 3 ngày)">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:12px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:4px;background:#f59e0b;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">69</span></td>
-                <td class="num" style="color:#10b981;font-weight:600">+12.1%</td>
+                <td class="num" style="color:#22C55E;font-weight:600">+12.1%</td>
             </tr>
             <tr class="row-hold" data-ticker="BVH">
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/BVH/thong-tin-co-ban.htm" target="_blank" rel="noopener">BVH</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="BVH">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">72,600đ</td>
                 <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:48%;background:#f59e0b"></div></div><span style="color:#f59e0b;font-weight:600">48%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: -0.7% | Ổn định (biến động 1.4% qua 3 ngày) | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#ef4444;font-weight:600;font-family:var(--font-mono)">-0.7%</span>&nbsp;<span style="color:#22C55E;font-size:9px" title="Ổn định (biến động 1.4% qua 3 ngày)">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:4px;background:#22C55E;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#22C55E;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:18px;background:#22C55E;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">40</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-5.0%</td>
             </tr>
@@ -537,6 +567,7 @@
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="FPT">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">76,000đ</td>
                 <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:48%;background:#f59e0b"></div></div><span style="color:#f59e0b;font-weight:600">48%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +2.9% | Ổn định (biến động 2.4% qua 3 ngày) | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#22C55E;font-weight:600;font-family:var(--font-mono)">+2.9%</span>&nbsp;<span style="color:#22C55E;font-size:9px" title="Ổn định (biến động 2.4% qua 3 ngày)">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:4px;background:#22C55E;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:13px;background:#22C55E;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#22C55E;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">45</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-2.2%</td>
             </tr>
@@ -545,6 +576,7 @@
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="GAS">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">80,100đ</td>
                 <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:48%;background:#f59e0b"></div></div><span style="color:#f59e0b;font-weight:600">48%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: +0.1% | Dao động vừa (±5.1% qua 3 ngày) | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#94a3b8;font-weight:600;font-family:var(--font-mono)">+0.1%</span>&nbsp;<span style="color:#f59e0b;font-size:9px" title="Dao động vừa (±5.1% qua 3 ngày)">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:4px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#f59e0b;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">42</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-0.7%</td>
             </tr>
@@ -553,14 +585,16 @@
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="VRE">🌍 geo:conflict (20), general (4), sanctions (1</span> </td>
                 <td class="num">28,600đ</td>
                 <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:48%;background:#f59e0b"></div></div><span style="color:#f59e0b;font-weight:600">48%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: -3.1% | Dao động vừa (±4.7% qua 3 ngày) | Xu hướng: ↑" style="cursor:help;white-space:nowrap"><span style="color:#ef4444;font-weight:600;font-family:var(--font-mono)">-3.1%</span>&nbsp;<span style="color:#f59e0b;font-size:9px" title="Dao động vừa (±4.7% qua 3 ngày)">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:4px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:17px;background:#f59e0b;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">58</span></td>
-                <td class="num" style="color:#10b981;font-weight:600">+4.0%</td>
+                <td class="num" style="color:#22C55E;font-weight:600">+4.0%</td>
             </tr>
             <tr class="row-hold" data-ticker="PLX">
                 <td class="ticker-cell"><a class="ticker-link" href="https://finance.vietstock.vn/PLX/thong-tin-co-ban.htm" target="_blank" rel="noopener">PLX</a></td>
                 <td><span class="badge badge-hold">CHỜ</span> <span class="news-badge news-badge-link" data-ticker="PLX">🌍 geo:conflict (20), general (4), sanctions (1</span> <span class="news-badge news-badge-link" data-ticker="PLX">🌊 ngoại mua mạnh</span> </td>
                 <td class="num">39,950đ</td>
                 <td><div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:38%;background:#f59e0b"></div></div><span style="color:#f59e0b;font-weight:600">38%</span></div></td>
+                <td class="num" title="Hôm nay vs hôm qua: -6.5% | Dao động vừa (±3.2% qua 3 ngày) | Xu hướng: →" style="cursor:help;white-space:nowrap"><span style="color:#ef4444;font-weight:600;font-family:var(--font-mono)">-6.5%</span>&nbsp;<span style="color:#f59e0b;font-size:9px" title="Dao động vừa (±3.2% qua 3 ngày)">●</span>&nbsp;<div style="display:inline-flex;align-items:flex-end;gap:2px;vertical-align:middle;height:16px"><div style="width:4px;height:4px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:22px;background:#f59e0b;border-radius:1px;opacity:0.7"></div><div style="width:4px;height:6px;background:#f59e0b;border-radius:1px;opacity:0.7"></div></div></td>
                 <td class="num"><span style="color:#94a3b8">40</span></td>
                 <td class="num" style="color:#ef4444;font-weight:600">-2.9%</td>
             </tr>
@@ -590,7 +624,7 @@
         <div style="font-size:12px;color:#94a3b8;line-height:1.8">
           <div style="margin-bottom:8px">📌 <strong style="color:#cbd5e1">Ai nên dùng dashboard này?</strong><br>Nhà đầu tư mới muốn có gợi ý ban đầu khi chọn cổ phiếu trong rổ VN30.</div>
           <div style="margin-bottom:8px">⚠️ <strong style="color:#cbd5e1">Lưu ý quan trọng</strong><br>AI chỉ là công cụ hỗ trợ. Không có mô hình nào đúng 100%. Luôn quản lý rủi ro và chỉ đầu tư số tiền bạn sẵn sàng mất.</div>
-          <div>🕓 <strong style="color:#cbd5e1">Cập nhật lúc nào?</strong><br>Dashboard tự động chạy sau 15:05 mỗi ngày giao dịch, sau khi thị trường đóng cửa.</div>
+          <div>🕓 <strong style="color:#cbd5e1">Cập nhật lúc nào?</strong><br>Dashboard được cập nhật thủ công sau khi thị trường đóng cửa (14:45 HN). Lần cập nhật gần nhất: <strong style="color:#cbd5e1">19/04/2026 11:17</strong>.</div>
         </div>
       </div>
     </div>
