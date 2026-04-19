@@ -116,7 +116,16 @@ def _build_html(df, date_str: str, regime: str, regime_state: int = 2) -> str:
       ⚪ HOLD: {hold_tickers}
     </p>
     <hr style="border-color:#1e293b;margin-top:24px"/>
-    <p style="color:#475569;font-size:11px">VN30 Signal — tự động gửi lúc {date_str}</p>
+    <div style="margin-top:16px;text-align:center">
+      <a href="https://dmquan8198.github.io/vn30-signal/"
+         style="display:inline-block;background:#3b82f6;color:#fff;text-decoration:none;
+                padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600">
+        📊 Xem Dashboard đầy đủ →
+      </a>
+    </div>
+    <p style="color:#475569;font-size:11px;margin-top:12px;text-align:center">
+      VN30 Signal — tự động gửi lúc {date_str}
+    </p>
   </div>
 </body>
 </html>"""

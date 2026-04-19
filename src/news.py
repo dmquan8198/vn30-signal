@@ -468,7 +468,7 @@ def save_sentiment(df: pd.DataFrame, date: str | None = None) -> Path:
 
 
 def save_articles(articles: list[dict], date: str | None = None) -> Path:
-    """Lưu mapping ticker → danh sách bài báo (title + link) để dùng trong dashboard."""
+    """Lưu mapping ticker → bài báo + geo risk headlines để dùng trong dashboard."""
     import json
     if date is None:
         date = pd.Timestamp.today().strftime("%Y-%m-%d")
@@ -488,12 +488,32 @@ def save_articles(articles: list[dict], date: str | None = None) -> Path:
                 "title": art["title"][:120],
                 "link": art.get("link", ""),
                 "published": art["published"].strftime("%d/%m %H:%M"),
-                "sentiment": score_sentiment(text),
+                "sentiment": score_sentiment(text, is_intl=art.get("is_intl", False)),
+                "source": "intl" if art.get("is_intl") else "domestic",
             })
 
-    # Keep max 5 latest per ticker
     for t in ticker_articles:
         ticker_articles[t] = ticker_articles[t][:5]
+
+    # Lưu geo risk headlines riêng để dashboard hiển thị khi click tag 🌍
+    geo = detect_geo_risk(articles, lookback_hours=48)
+    geo_headlines = []
+    for art in articles:
+        if art["published"] < now - timedelta(hours=48):
+            continue
+        text = (art["title"] + " " + art["summary"]).lower()
+        if any(kw in text for kw in GEO_RISK_KEYWORDS):
+            geo_headlines.append({
+                "title": art["title"][:140],
+                "link": art.get("link", ""),
+                "published": art["published"].strftime("%d/%m %H:%M"),
+                "source": art["feed"],
+            })
+    ticker_articles["_geo_risk"] = {
+        "level": geo["risk_level"],
+        "summary": geo["summary"],
+        "headlines": geo_headlines[:8],
+    }
 
     path.write_text(json.dumps(ticker_articles, ensure_ascii=False), encoding="utf-8")
     return path

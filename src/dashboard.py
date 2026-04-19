@@ -745,39 +745,64 @@ new Chart(document.getElementById('confChart'), {{
 }});
 
 // News popup
-function showNewsPopup(ticker, event) {{
+const geoRisk = tickerArticles['_geo_risk'] || {{}};
+
+function showGeoPopup(event) {{
   const popup = document.getElementById('newsPopup');
   const overlay = document.getElementById('popupOverlay');
-  const titleEl = document.getElementById('popupTicker');
-  const contentEl = document.getElementById('popupContent');
+  document.getElementById('popupTicker').textContent = '🌍 Cảnh báo địa chính trị';
+  const heads = (geoRisk.headlines || []);
+  const lvlMap = {{1:'🟡 Thấp', 2:'🟠 Trung bình', 3:'🔴 Cao'}};
+  const lvlText = lvlMap[geoRisk.level] || '';
+  let html = `<div style="font-size:12px;color:#f59e0b;margin-bottom:10px;padding:6px 10px;background:rgba(245,158,11,0.1);border-radius:6px">
+    Mức độ: <strong>${{lvlText}}</strong> &nbsp;·&nbsp; ${{geoRisk.summary || ''}}
+  </div>`;
+  if (heads.length === 0) {{
+    html += '<p class="no-news-msg">Không tìm thấy tiêu đề cụ thể.</p>';
+  }} else {{
+    html += heads.map(a => `<div class="news-article">
+      ${{a.link ? `<a href="${{a.link}}" target="_blank" rel="noopener">${{a.title}}</a>` : `<span style="color:#e2e8f0">${{a.title}}</span>`}}
+      <div class="news-article-meta"><span>${{a.published}}</span><span style="color:#64748b">${{a.source}}</span></div>
+    </div>`).join('');
+  }}
+  document.getElementById('popupContent').innerHTML = html;
+  positionAndShow(event);
+}}
 
-  titleEl.textContent = ticker + ' — Tin tức gần đây';
-  const arts = tickerArticles[ticker] || [];
+function showNewsPopup(ticker, event) {{
+  const popup = document.getElementById('newsPopup');
+  document.getElementById('popupTicker').textContent = ticker + ' — Tin tức gần đây';
+  const arts = (tickerArticles[ticker] || []).filter(a => !a._geo);
 
   if (arts.length === 0) {{
-    contentEl.innerHTML = '<p class="no-news-msg">Chưa có tin tức nào về ' + ticker + ' trong 3 ngày qua.</p>';
+    document.getElementById('popupContent').innerHTML =
+      '<p class="no-news-msg">Chưa có tin tức nào về ' + ticker + ' trong 3 ngày qua.</p>';
   }} else {{
-    contentEl.innerHTML = arts.map(a => {{
+    document.getElementById('popupContent').innerHTML = arts.map(a => {{
       const sentClass = a.sentiment > 0 ? 'sent-pos' : a.sentiment < 0 ? 'sent-neg' : '';
-      const sentIcon = a.sentiment > 0 ? '📈' : a.sentiment < 0 ? '📉' : '➡️';
+      const sentIcon  = a.sentiment > 0 ? '📈' : a.sentiment < 0 ? '📉' : '➡️';
+      const srcBadge  = a.source === 'intl' ? '<span style="color:#3b82f6;font-size:10px">🌐 Quốc tế</span>' : '';
       return `<div class="news-article">
         <a href="${{a.link}}" target="_blank" rel="noopener">${{a.title}}</a>
         <div class="news-article-meta">
           <span>${{a.published}}</span>
           <span class="${{sentClass}}">${{sentIcon}} ${{a.sentiment > 0 ? 'Tích cực' : a.sentiment < 0 ? 'Tiêu cực' : 'Trung lập'}}</span>
+          ${{srcBadge}}
         </div>
       </div>`;
     }}).join('');
   }}
+  positionAndShow(event);
+}}
 
-  // Position popup near click
+function positionAndShow(event) {{
+  const popup = document.getElementById('newsPopup');
   const vw = window.innerWidth, vh = window.innerHeight;
   let x = event.clientX + 12, y = event.clientY + 12;
-  popup.style.left = Math.min(x, vw - 400) + 'px';
-  popup.style.top = Math.min(y, vh - 300) + 'px';
-
+  popup.style.left = Math.min(x, vw - 420) + 'px';
+  popup.style.top  = Math.min(y, vh - 320) + 'px';
   popup.classList.add('visible');
-  overlay.classList.add('visible');
+  document.getElementById('popupOverlay').classList.add('visible');
 }}
 
 document.getElementById('popupClose').addEventListener('click', closePopup);
@@ -791,10 +816,14 @@ document.addEventListener('click', function(e) {{
   const badge = e.target.closest('.news-badge-link');
   if (badge) {{
     e.preventDefault();
-    showNewsPopup(badge.dataset.ticker, e);
+    const tag = badge.textContent || '';
+    if (tag.includes('geo:') || tag.includes('🌍')) {{
+      showGeoPopup(e);
+    }} else {{
+      showNewsPopup(badge.dataset.ticker, e);
+    }}
     return;
   }}
-  // news section ticker-link still opens popup
   const el = e.target.closest('.news-ticker-name');
   if (el) {{
     e.preventDefault();
