@@ -18,7 +18,7 @@ SENDER    = os.getenv("NOTIFY_EMAIL_SENDER")
 PASSWORD  = os.getenv("NOTIFY_EMAIL_PASSWORD")
 RECEIVERS = os.getenv("NOTIFY_EMAIL_TO", "").split(",")
 
-DASHBOARD_URL = "https://dmquan8198.github.io/vn30-signal/dashboard/"
+DASHBOARD_URL = "https://vn30-signal.vercel.app/"
 
 # ── Design tokens (nhất quán với dashboard) ────────────────────────────────
 BG         = "#020617"
